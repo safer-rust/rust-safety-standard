@@ -58,7 +58,7 @@ Since all the requirements are satisfied, `bar` can be declared as safe accordin
 pub  fn bar() {
     let mut x: u32 = 42;
     let p: *const u32 = &x;
-    /// # Safety
+    /// Safety: 
     /// - `p` is valid for reads because it points to `x`.
     /// - `p` is properly aligned for `u32`.
     unsafe { foo(p); }
@@ -71,11 +71,12 @@ Consider the example below: `bar` satisfies one safety requirement (valid for re
 Therefore, `bar` must be declared unsafe due to the unsatisfied alignment requirement.
 
 ```rust
+/// # Safety:
 /// - `x` must be properly aligned for `u32`.
 pub unsafe fn bar<T>(x: T) {
     let p: *const u32 = &x as *const T as *const u32;
 
-    /// # Safety: 
+    /// Safety: 
     /// - `p` is valid for reads because it points to `x`.
     unsafe { foo(p as *mut u32); }
 }
@@ -90,7 +91,7 @@ pub unsafe fn bar<T>(x: T) {
     let p: *const u32 = &x as *const T as *const u32;
 
     if x > 0 {
-        /// # Safety: 
+        /// Safety: 
         /// - `p` is valid for reads because it points to `x`.
         unsafe { foo(p as *mut u32); }
     }

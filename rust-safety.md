@@ -58,9 +58,9 @@ Since all the requirements are satisfied, `bar` can be declared as safe accordin
 pub  fn bar() {
     let mut x: u32 = 42;
     let p: *const u32 = &x;
-    /// Safety: 
-    /// - `p` is valid for reads because it points to `x`.
-    /// - `p` is properly aligned for `u32`.
+    // Safety: 
+    // - `p` is valid for reads because it points to `x`.
+    // - `p` is properly aligned for `u32`.
     unsafe { foo(p); }
 }
 ```
@@ -76,8 +76,8 @@ Therefore, `bar` must be declared unsafe due to the unsatisfied alignment requir
 pub unsafe fn bar<T>(x: T) {
     let p: *const u32 = &x as *const T as *const u32;
 
-    /// Safety: 
-    /// - `p` is valid for reads because it points to `x`.
+    // Safety: 
+    // - `p` is valid for reads because it points to `x`.
     unsafe { foo(p as *mut u32); }
 }
 ```
@@ -91,8 +91,8 @@ pub unsafe fn bar<T>(x: T) {
     let p: *const u32 = &x as *const T as *const u32;
 
     if x > 0 {
-        /// Safety: 
-        /// - `p` is valid for reads because it points to `x`.
+        // Safety: 
+        // - `p` is valid for reads because it points to `x`.
         unsafe { foo(p as *mut u32); }
     }
 }
@@ -100,6 +100,19 @@ pub unsafe fn bar<T>(x: T) {
 
 ## 3 Stucts
 
+A struct is a user-defined data type composed of named fields. Its behavior is defined through associated functions within `impl` blocks.
+- A method is a special associated function that takes self as the first parameter.
+- Associated functions without a receiver are commonly used for constructors or type-level operations.
+- Rust does not provide built-in constructors; by convention, static associated functions such as `new` are used.
+- Struct instances can also be created using struct literals, e.g., `Foo { field1: value, ... }`.
+
+### 3.1 Safety Rules
+- **Struct Safety Rule 1**: If none associated functions of a struct contain unsafe code, the struct cannot cause undefined behavior and all its associated functions can be declared as safe.
+- **Struct Safety Rule 2**: For associated functions without a receiver, their safety rules are the same with the safety rules defined for [free functions](#2-free-functions).
+
+### 3.2 Safety Comments
+
+### 3.3 Example Cases
 Consider the following struct:
 ```rust
 struct Foo<'a> {

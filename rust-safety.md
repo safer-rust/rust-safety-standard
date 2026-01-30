@@ -27,7 +27,7 @@ The soundness of free functions is relatively straightforward to justify.
 There are two mandatory rules and one recommended practice for documenting the safety requirements of free functions:
 - **Function Comments Rule 1**: All unsafe functions must document their safety requirements.
 - **Function Comments Rule 2**: Safety requirements must be externally verifiable and must not depend on the function’s internal implementation.
-- **Function Comments Rule 3** (Recommended):  At the callsite, users are encouraged to justify why the safety requirements are satisfied.
+- **Function Comments Rule 3** (Recommended):  At the callsite of unsafe code, users are encouraged to justify why the safety requirements are satisfied.
 
 ### 2.3 Example Cases
 
@@ -122,8 +122,15 @@ The safety of a struct’s methods depends on whether they contain unsafe code:
 - **Struct Safety Rule 5**: If a method contains unsafe code, it can be declared safe only if both of the following conditions are met:
   - 1) It does not violate the type invariant of the struct.
   - 2) All safety requirements of its internal unsafe code are satisfied.
+   
+Note that type invariants play a key role in preventing the safety of methods from depending on the behavior of constructors, and vice versa.
  
 ### 3.2 Safety Comments
+- **Struct Comments Rule 1** (Recommended): Each struct with either unsafe constructors or unsafe methods should document the type invariant.
+- **Struct Comments Rule 2**: Each unsafe associated function should document its safety requirements:
+  - 1) The requirements should not depend on other functions of the struct.
+  - 2) They must be externally verifiable and must not depend on the function’s internal implementation.
+- **Struct Comments Rule 3** (Recommended):  At the callsite of unsafe code, users are encouraged to justify why the safety requirements are satisfied.
 
 ### 3.3 Example Cases
 Consider the following struct:

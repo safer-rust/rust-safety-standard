@@ -211,14 +211,23 @@ impl Foo {
 
 Both implementations satisfy Rust’s soundness requirement. For the first type, examples can be found in the Rust standard library, such as [DwarfReader](https://github.com/rust-lang/rust/blob/7d8ebe3128fc87f3da1ad64240e63ccf07b8f0bd/library/std/src/sys/personality/dwarf/mod.rs#L15-L69) and [Unique](https://github.com/rust-lang/rust/blob/7d8ebe3128fc87f3da1ad64240e63ccf07b8f0bd/library/core/src/ptr/unique.rs#L94-L156); the second type is commonly used in Rust-for-Linux, with examples including [IovIterSource](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/iov.rs#L38-L49), [Resource](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/io/resource.rs#L75-L169), and [Bitmap](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/bitmap.rs#L17-L90).
 
-
 ## 4 Traits
+A trait defines a collection of associated items (typically functions) that can be shared across multiple types. When a type implements a trait, its functions can be viewed as general associated functions of the type.
+
+### 4.1 Safety Rules
+- **Trait Safety Rule 1**:
+- **Trait Safety Rule 2**:
+
+
+### 4.2 Safety Comments
+
+### 4.3 Example Cases
 
 ## 5 Visibility
 
 ## 6 More
-
-### 6.1 Static Mut
+### 6.1 Raw Pointer Dereference
+### 6.2 Static Mut
 
 ## 7 Summary
 

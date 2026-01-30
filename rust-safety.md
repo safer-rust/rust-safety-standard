@@ -133,6 +133,7 @@ Note that type invariants play a key role in preventing the safety of methods fr
 - **Struct Comments Rule 3** (Recommended):  At the callsite of unsafe code, users are encouraged to justify why the safety requirements are satisfied.
 
 ### 3.3 Example Cases
+
 Consider the following struct:
 ```rust
 struct Foo<'a> {
@@ -147,9 +148,14 @@ impl Foo {
     pub fn from(p: *mut u8, l: usize) -> Foo {
         Foo { ptr: p, len: l }
     }
-    pub unsafe fn get(&self) -> &[u8] { 
+    /// # Safety:
+    /// -
+    pub unsafe fn get(&self) -> &[u8] {
+        // Safety: 
         slice::from_raw_parts(self.ptr, self.len)
     }
+    /// # Safety:
+    /// -
     pub unsafe fn set_len(&mut self, l: usize) {
         self.len = l;
     }
@@ -159,17 +165,23 @@ impl Foo {
 Alternatively, the constructor can be declared unsafe while the accessor method remains safe:
 ```rust
 impl Foo {
+    /// # Safety:
+    /// -
     pub unsafe fn from(p: *mut u8, l: usize) -> Foo {
         Foo { ptr: p, len: l }
     }
-    pub fn get(&self) -> &[u8] { 
+    pub fn get(&self) -> &[u8] {
+        // Safety: 
         unsafe { slice::from_raw_parts(self.ptr, self.len) }
     }
+    /// # Safety:
+    /// -
     pub unsafe fn set_len(&mut self, l: usize) {
         self.len = l;
     }
 }
 ```
+
 Both implementations satisfy Rust’s soundness requirement. 
 
 

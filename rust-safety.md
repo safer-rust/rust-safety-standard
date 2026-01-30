@@ -108,8 +108,21 @@ A struct is a user-defined data type composed of named fields. Its behavior is d
 
 ### 3.1 Safety Rules
 - **Struct Safety Rule 1**: If none associated functions of a struct contain unsafe code, the struct cannot cause undefined behavior and all its associated functions can be declared as safe.
-- **Struct Safety Rule 2**: For associated functions without a receiver, their safety rules are the same with the safety rules defined for [free functions](#2-free-functions).
+- **Struct Safety Rule 2**: For associated functions without a receiver, their safety rules are generally the same with the safety rules defined for [free functions](#2-free-functions).
 
+Before discussing methods involving unsafe code, we first define the type invariant of a struct.
+A type invariant specifies the conditions that all instances of the type must satisfy, regardless of which constructor is used to create them.
+If a constructor is unsafe, its usage must satisfy the corresponding safety requirements, which forms the basis of Struct Safety Rule 3.
+In practice, the domain of the invariant can be defined with respect to the potential undefined behaviors that might be triggered by other methods.
+
+- **Struct Safety Rule 3**: A constructor can be declared safe if it guarantees that the type invariant of the struct is satisfied; otherwise, it must be declared unsafe.
+
+The safety of a struct’s methods depends on whether they contain unsafe code:
+- **Struct Safety Rule 4**: A method that contains no unsafe code can be declared safe if it does not violate the type invariant of the struct.
+- **Struct Safety Rule 5**: If a method contains unsafe code, it can be declared safe only if both of the following conditions are met:
+  - 1) It does not violate the type invariant of the struct.
+  - 2) All safety requirements of its internal unsafe code are satisfied.
+ 
 ### 3.2 Safety Comments
 
 ### 3.3 Example Cases
@@ -151,6 +164,8 @@ impl Foo {
 }
 ```
 Both implementations satisfy Rust’s soundness requirement. 
+
+
 
 
 ## 4 Traits

@@ -82,7 +82,7 @@ pub unsafe fn bar<T>(x: T) {
 }
 ```
 
-In some cases, the safety requirements of unsafe callees are not directly propagated to the caller. It can be transformed to other safety requirements.
+In some cases, the safety requirements of unsafe callees are not directly propagated to the caller; instead, they may manifest as different safety obligations.
 ```rust
 /// # Safety: 
 /// - `x` must be properly aligned for `u32`, or

@@ -112,6 +112,8 @@ A struct is a user-defined data type composed of named fields. Its behavior is d
 
 Before discussing methods involving unsafe code, we first define the type invariant of a struct.
 A type invariant specifies the conditions that all instances of the type must satisfy, regardless of which constructor is used to create them.
+Type invariant is widely used in Rust-for-Linux, e.g., [List](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L31-L266), [ListLinks](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L367-L375), [CursorPeek](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L1100-L1107).
+
 If a constructor is unsafe, its usage must satisfy the corresponding safety requirements, which forms the basis of Struct Safety Rule 3.
 In practice, the domain of the invariant can be defined with respect to the potential undefined behaviors that might be triggered by other methods.
 

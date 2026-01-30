@@ -134,7 +134,7 @@ Note that type invariants play a key role in preventing the safety of methods fr
 
 ### 3.3 Example Cases
 
-Consider the following struct:
+Consider the following struct, there are different ways to declare the safety of its associated functions.
 ```rust
 struct Foo<'a> {
     ptr: *mut u8,
@@ -142,40 +142,65 @@ struct Foo<'a> {
 }
 ```
 
-One possible design is to declare the constructor as safe while marking other methods as unsafe:
+One possible design is to declare the constructor as safe while marking other methods as unsafe. 
+In this case, this type does not maintain a validity invariant.
+Instead, each unsafe method defines the conditions required for safe use.
 ```rust
 impl Foo {
     pub fn from(p: *mut u8, l: usize) -> Foo {
         Foo { ptr: p, len: l }
     }
+
     /// # Safety:
-    /// -
+    /// - `self.ptr` must be valid for reads of `self.len` bytes.
+    /// - The memory must be properly aligned.
+    /// - The memory must not be mutated for the duration of the returned slice.
     pub unsafe fn get(&self) -> &[u8] {
-        // Safety: 
+        // Safety:
+        // - The caller guarantees that `ptr` and `len` satisfy the requirements of `slice::from_raw_parts`.
         slice::from_raw_parts(self.ptr, self.len)
     }
+
     /// # Safety:
-    /// -
+    /// - This method may break the type invariant of the struct
+    /// - `l` must not exceed the size of the allocation referenced by `self.ptr`.
     pub unsafe fn set_len(&mut self, l: usize) {
         self.len = l;
     }
 }
 ```
 
-Alternatively, the constructor can be declared unsafe while the accessor method remains safe:
+Alternatively, the constructor can be declared unsafe while the accessor method remains safe. In this design, the constructor establishes a type invariant that other methods can rely on.
+
 ```rust
+/// # Safety:
+/// ## Type invariant
+/// - `ptr` is valid for reads of `len` bytes.
+/// - `ptr` is properly aligned.
+/// - The referenced memory remains valid for the lifetime of `Foo`.
+struct Foo<'a> {
+    ptr: *mut u8,
+    len: usize 
+}
+
 impl Foo {
-    /// # Safety:
-    /// -
+    /// # Safety
+    /// - `p` must be valid for reads of `l` bytes.
+    /// - `p` must be properly aligned.
+    /// - The memory must remain valid for the lifetime of the constructed `Foo`.
     pub unsafe fn from(p: *mut u8, l: usize) -> Foo {
         Foo { ptr: p, len: l }
     }
+
     pub fn get(&self) -> &[u8] {
-        // Safety: 
+        // Safety:
+        // - The invariant is guaranteed by `from`.
         unsafe { slice::from_raw_parts(self.ptr, self.len) }
     }
+
     /// # Safety:
-    /// -
+    /// - This method may break the type invariant of the struct
+    /// - `l` must not exceed the size of the allocation referenced by `self.ptr`.
     pub unsafe fn set_len(&mut self, l: usize) {
         self.len = l;
     }

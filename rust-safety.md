@@ -11,7 +11,7 @@ The design space becomes even more complex when visibility boundaries are taken 
 Furthermore, when a function is declared unsafe, developers must clearly document the conditions required for its correct use, and users must fully understand them.
 This raises another important question: what information is necessary to specify the safety requirements of an unsafe function?
 
-This document addresses these challenges by presenting actionable guidance derived from extensive reviews of unsafe code in several Rust projects, particularly the Rust standard library.
+This document addresses these challenges by presenting actionable guidance derived from extensive reviews of unsafe code in several Rust projects, particularly the Rust standard library and Rust-for-Linux.
 Our recommendations are grounded in the theoretical foundation presented in [A Trace-based Approach for Code Safety Analysis](https://arxiv.org/pdf/2510.10410). 
 
 ## 2 Free Functions
@@ -112,7 +112,7 @@ A struct is a user-defined data type composed of named fields. Its behavior is d
 
 Before discussing methods involving unsafe code, we first define the type invariant of a struct.
 A type invariant specifies the conditions that all instances of the type must satisfy, regardless of which constructor is used to create them.
-Type invariant is widely used in Rust-for-Linux, e.g., [List](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L31-L266), [ListLinks](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L367-L375), [CursorPeek](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L1100-L1107).
+Type invariants are widely used in Rust-for-Linux, e.g., [IovIterSource](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/iov.rs#L38-L49), [List](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L31-L266), [ListLinks](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L367-L375), [Cursor](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L945-L952), [CursorPeek](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L1100-L1107).
 
 If a constructor is unsafe, its usage must satisfy the corresponding safety requirements, which forms the basis of Struct Safety Rule 3.
 In practice, the domain of the invariant can be defined with respect to the potential undefined behaviors that might be triggered by other methods.
@@ -209,9 +209,7 @@ impl Foo {
 }
 ```
 
-Both implementations satisfy Rust’s soundness requirement. 
-
-
+Both implementations satisfy Rust’s soundness requirement. For the first type, examples can be found in the Rust standard library, such as [DwarfReader](https://github.com/rust-lang/rust/blob/7d8ebe3128fc87f3da1ad64240e63ccf07b8f0bd/library/std/src/sys/personality/dwarf/mod.rs#L15-L69) and [Unique](https://github.com/rust-lang/rust/blob/7d8ebe3128fc87f3da1ad64240e63ccf07b8f0bd/library/core/src/ptr/unique.rs#L94-L156); the second type are commonly used in Rust-for-Linux, with examples including [IovIterSource](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/iov.rs#L38-L49), [Resource](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/io/resource.rs#L75-L169), and [Bitmap](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/bitmap.rs#L17-L90).
 
 
 ## 4 Traits

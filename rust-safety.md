@@ -36,10 +36,10 @@ The raw pointer `r` is derived from the function parameter `p`, and the function
 According to Function Safety Rule 2, foo must be declared unsafe.
 
 ```rust
-/// Safety:
+/// # Safety:
 /// - `p` must be valid for reads.
 /// - `p` must be properly aligned for `u32`.
-pub unsafe fn foo(p: *mut u32) -> u32 {
+pub unsafe fn foo(p: *const u32) -> u32 {
     let r = p;
     unsafe { *r }
 }
@@ -57,7 +57,7 @@ Since all the requirements are satisfied, `bar` can be declared as safe accordin
 ```rust
 pub  fn bar() {
     let mut x: u32 = 42;
-    let p: *mut u32 = &mut x;
+    let p: *const u32 = &x;
     /// # Safety
     /// - `p` is valid for reads because it points to `x`.
     /// - `p` is properly aligned for `u32`.
@@ -75,9 +75,25 @@ Therefore, `bar` must be declared unsafe due to the unsatisfied alignment requir
 pub unsafe fn bar<T>(x: T) {
     let p: *const u32 = &x as *const T as *const u32;
 
-    /// # Safety
+    /// # Safety: 
     /// - `p` is valid for reads because it points to `x`.
     unsafe { foo(p as *mut u32); }
+}
+```
+
+In some cases, the safety requirements of unsafe callees are not directly propagated to the caller. It can be transformed to other safety requirements.
+```rust
+/// # Safety: 
+/// - `x` must be properly aligned for `u32`, or
+/// - `x` <= 0
+pub unsafe fn bar<T>(x: T) {
+    let p: *const u32 = &x as *const T as *const u32;
+
+    if x > 0 {
+        /// # Safety: 
+        /// - `p` is valid for reads because it points to `x`.
+        unsafe { foo(p as *mut u32); }
+    }
 }
 ```
 

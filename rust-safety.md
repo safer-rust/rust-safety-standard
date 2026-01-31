@@ -280,6 +280,29 @@ pub struct Vec<T, #[unstable(feature = "allocator_api", issue = "32838")] A: All
 Developers within the same module can easily create a `Vec` instance or modify `len` in a way that violates the type invariant. 
 However, this risk may hopefully be mitigated in the near future through the use of [unsafe fields](https://rust-lang.github.io/rust-project-goals/2025h1/unsafe-fields.html) in the nearby future. 
 
+Such examples are also common in Rust-for-Linux, for instance [List](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L31-L266), as shown below. The type invariant can be enforced via the new constructor. However, developers working within the same module can bypass the invariant by using a struct literal.
+```
+/// # Invariants
+///
+/// * If the list is empty, then `first` is null. Otherwise, `first` points at the `ListLinks` field of the first element in the list.
+/// * All prev/next pointers in `ListLinks` fields of items in the list are valid and form a cycle.
+/// * For every item in the list, the list owns the associated [`ListArc`] reference and has exclusive access to the `ListLinks` field.
+pub struct List<T: ?Sized + ListItem<ID>, const ID: u64 = 0> {
+    first: *mut ListLinksFields,
+    _ty: PhantomData<ListArc<T, ID>>,
+}
+
+impl<T: ?Sized + ListItem<ID>, const ID: u64> List<T, ID> {
+    /// Creates a new empty list.
+    pub const fn new() -> Self {
+        Self {
+            first: ptr::null_mut(),
+            _ty: PhantomData,
+        }
+    }
+}
+```
+
 - **Module-level Safety Criteria**: All uses of the module’s public safe items (or unsafe items when their safety requirements are satisfied) from outside the module must not cause undefined behavior.
 
 

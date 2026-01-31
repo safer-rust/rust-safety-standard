@@ -108,7 +108,6 @@ Besides function calls, operations such as raw pointer dereferencing, accessing 
 A struct is a user-defined data type composed of named fields. Its behavior is defined through associated functions within `impl` blocks.
 - A method is a special associated function that takes self as the first parameter.
 - Associated functions without a receiver are commonly used for constructors or type-level operations.
-- Rust does not provide built-in constructors; by convention, static associated functions such as `new` are used.
 - Struct instances can also be created using struct literals, e.g., `Foo { field1: value, ... }`.
 
 ### 3.1 Safety Rules

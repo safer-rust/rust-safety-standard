@@ -263,6 +263,7 @@ The basic unit of Rust software is a crate. Each crate can contain one or more m
 Visibility does not directly affect the Function Safety Rules, because whether a function can be declared safe is primarily determined by how it handles its unsafe callees. 
 However, visibility becomes more relevant when considering structs and traits, since different levels of visibility can influence the guarantees a type can provide.
 - **Stuct-level Safety Criteria**: All uses of a struct’s safe items (or unsafe items when their safety requirements are satisfied) must not cause undefined behavior, even within the same module.
+
 This is the strongest criterion because all private methods and fields are accessible within the module.
 The struct cannot rely on visibility to enforce soundness.
 Ensuring this can be challenging, particularly when considering struct literals, which allow creation of instances without going through constructors that uphold the type invariant.

@@ -118,7 +118,7 @@ Before discussing methods involving unsafe code, we first define the type invari
 A type invariant specifies the conditions that all instances of the type must satisfy, regardless of which constructor is used to create them.
 Type invariants are widely used in Rust-for-Linux, e.g., [IovIterSource](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/iov.rs#L38-L49), [List](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L31-L266), [ListLinks](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L367-L375), [Cursor](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L945-L952), [CursorPeek](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L1100-L1107).
 
-If a constructor is unsafe, its usage must satisfy the corresponding safety requirements, which forms the basis of Struct Safety Rule 3.
+If a constructor is safe, its use should always guarantee that the type invariants are upheld, forming the basis of Struct Safety Rule 3.
 In practice, the domain of the invariant can be defined with respect to the potential undefined behaviors that might be triggered by other methods.
 
 - **Struct Safety Rule 3**: A constructor can be declared safe if it guarantees that the type invariant of the struct is satisfied; otherwise, it must be declared unsafe.

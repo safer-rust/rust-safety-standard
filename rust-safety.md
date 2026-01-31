@@ -262,12 +262,25 @@ The basic unit of Rust software is a crate. Each crate can contain one or more m
 
 Visibility does not directly affect the Function Safety Rules, because whether a function can be declared safe is primarily determined by how it handles its unsafe callees. 
 However, visibility becomes more relevant when considering structs and traits, since different levels of visibility can influence the guarantees a type can provide.
-- **Stuct-level Safety Criteria**: All uses of the struct’s methods must not cause undefined behavior, even within the same module.
+- **Stuct-level Safety Criteria**: All uses of a struct’s safe items (or unsafe items when their safety requirements are satisfied) must not cause undefined behavior, even within the same module.
 This is the strongest criterion because all private methods and fields are accessible within the module.
 The struct cannot rely on visibility to enforce soundness.
 Ensuring this can be challenging, particularly when considering struct literals, which allow creation of instances without going through constructors that uphold the type invariant.
 
 - **Weak Stuct-level Safety Criteria**: This criterion ignores the risk that a type instance could be created or modified via a struct literal that violates the struct’s invariant.
+
+This criterion is the one most commonly employed by the Rust standard library. 
+For example, [Vec](https://github.com/rust-lang/rust/blob/7d8ebe3128fc87f3da1ad64240e63ccf07b8f0bd/library/alloc/src/vec/mod.rs#L440) is defined as follows: 
+```rust
+pub struct Vec<T, #[unstable(feature = "allocator_api", issue = "32838")] A: Allocator = Global> {
+    buf: RawVec<T, A>,
+    len: usize,
+}
+```
+Developers within the same module can easily create a `Vec` instance or modify `len` in a way that violates the type invariant. 
+However, this risk may hopefully be mitigated in the near future through the use of [unsafe fields](https://rust-lang.github.io/rust-project-goals/2025h1/unsafe-fields.html) in the nearby future. 
+
+- **Module-level Safety Criteria**: All uses of the module’s public safe items (or unsafe items when their safety requirements are satisfied) from outside the module must not cause undefined behavior.
 
 
 ## 6 More

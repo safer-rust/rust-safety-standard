@@ -304,6 +304,10 @@ impl<T: ?Sized + ListItem<ID>, const ID: u64> List<T, ID> {
 }
 ```
 
+Note that all structs and associated functions must be sound regardless of whether they are public or private. In other words, a struct cannot rely on visibility to maintain soundness.
+For example, in Rust-for-Linux’s `List`, the private method [insert_inner](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L489-L531) is declared as unsafe. 
+This reflects the fact that, even though the function is not part of the public API, if its correct use depends on invariants that cannot be enforced by the type system alone, it must be declared as unsafe.
+
 - **Module-level Safety Criteria**: All uses of the module’s public safe items (or unsafe items when their safety requirements are satisfied) from outside the module must not cause undefined behavior.
 
 

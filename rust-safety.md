@@ -33,7 +33,7 @@ There are two mandatory rules and one recommended practice for documenting the s
 
 ### 2.3 Example Cases
 
-The following function foo performs a raw pointer dereference, which is an unsafe operation. 
+The following function `foo` performs a raw pointer dereference, which is an unsafe operation. 
 The raw pointer `r` is derived from the function parameter `p`, and the function does not check whether it is valid before dereferencing it. 
 According to Function Safety Rule 2, foo must be declared unsafe.
 

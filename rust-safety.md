@@ -1,4 +1,6 @@
 # Rust Safety Standard
+This standard is a draft and welcomes feedback.
+
 ## 1. Background
 Rust’s safety guarantees rely heavily on the correct use of unsafe code. 
 However, maintaining safety becomes increasingly challenging as real-world crates grow in size, particularly when attempting to enforce a clear separation between safe and unsafe components. 
@@ -97,6 +99,9 @@ pub unsafe fn bar<T>(x: T) {
     }
 }
 ```
+
+Besides function calls, operations such as raw pointer dereferencing, accessing static mut values, and reading or writing union fields can be treated in the same way as unsafe callees with specific safety requirements, and the same rules apply.
+
 
 ## 3 Stucts
 
@@ -336,10 +341,4 @@ pub(crate) fn call_ostd_main() -> ! {
     }
 }
 ```
-
-## 6 More
-### 6.1 Raw Pointer Dereference
-### 6.2 Static Mut
-
-## 7 Summary
 

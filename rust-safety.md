@@ -265,13 +265,13 @@ The basic unit of Rust software is a crate. Each crate can contain one or more m
   -  `pub(super)`: the item is visible to the parent module.
 
 A program component can rely on visibility restrictions to maintain sound abstractions. Real-world Rust projects, however, may adopt different levels of soundness guarantees.
-- **Struct-level Soundness Criteria**: All uses of a struct’s safe items (or unsafe items when their safety requirements are satisfied) must not cause undefined behavior, even within the same module.
+- **Struct-level Soundness Criterion**: All uses of a struct’s safe items (or unsafe items when their safety requirements are satisfied) must not cause undefined behavior, even within the same module.
 
 This is the strongest criterion because all private methods and fields are accessible within the module.
 The struct cannot rely on visibility to enforce soundness.
 Ensuring this can be challenging, particularly when considering struct literals, which allow creation of instances without going through constructors that uphold the type invariant.
 
-- **Weak Stuct-level Soundness Criteria**: This criterion ignores the risk that a type instance could be created or modified via a struct literal that violates the struct’s invariant.
+- **Weak Struct-level Soundness Criterion**: This criterion ignores the risk that a type instance could be created or modified via a struct literal that violates the struct’s invariant.
 
 This criterion is the one most commonly employed by the Rust standard library. 
 For example, [Vec](https://github.com/rust-lang/rust/blob/7d8ebe3128fc87f3da1ad64240e63ccf07b8f0bd/library/alloc/src/vec/mod.rs#L440) is defined as follows: 
@@ -311,8 +311,8 @@ Note that all structs and associated functions must be sound regardless of wheth
 For example, in Rust-for-Linux’s `List`, the private method [insert_inner](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L489-L531) is declared as unsafe. 
 This reflects the fact that, even though the function is not part of the public API, if its correct use depends on invariants that cannot be enforced by the type system alone, it must be declared as unsafe.
 
-- **Module-level Soundness Criteria**: All uses of the module’s public safe items (or unsafe items when their safety requirements are satisfied) from outside the module must not cause undefined behavior.
-- **Crate-level Soundness Criteria**: All uses of the crate’s public safe items (or unsafe items when their safety requirements are satisfied) from outside the crate must not cause undefined behavior.
+- **Module-level Soundness Criterion**: All uses of the module’s public safe items (or unsafe items when their safety requirements are satisfied) from outside the module must not cause undefined behavior.
+- **Crate-level Soundness Criterion**: All uses of the crate’s public safe items (or unsafe items when their safety requirements are satisfied) from outside the crate must not cause undefined behavior.
 
 The two criteria differ only in scope. 
 Some systems may nevertheless prefer such safety criteria because certain APIs are designed for specific usage contexts and can rely on global or system state to ensure safety. 

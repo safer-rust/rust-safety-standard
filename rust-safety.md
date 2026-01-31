@@ -281,8 +281,8 @@ pub struct Vec<T, #[unstable(feature = "allocator_api", issue = "32838")] A: All
     len: usize,
 }
 ```
-Developers within the same module can easily create a `Vec` instance or modify `len` in a way that violates the type invariant. 
-However, this risk may hopefully be mitigated in the near future through the use of [unsafe fields](https://rust-lang.github.io/rust-project-goals/2025h1/unsafe-fields.html) in the nearby future. 
+Developers within the same module can easily create a `Vec` instance or modify `len` via struct literals in ways that violate the type invariant. 
+However, this risk may be mitigated in the future through the use of [unsafe fields](https://rust-lang.github.io/rust-project-goals/2025h1/unsafe-fields.html). 
 
 Such examples are also common in Rust-for-Linux, for instance [List](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L31-L266), as shown below. The type invariant can be enforced via the new constructor. However, developers working within the same module can bypass the invariant by using a struct literal.
 ```rust

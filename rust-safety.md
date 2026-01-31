@@ -75,6 +75,7 @@ Therefore, `bar` must be declared unsafe due to the unsatisfied alignment requir
 ```rust
 /// # Safety:
 /// - `x` must be properly aligned for `u32`.
+/// - `T` must not have padding in its first 4 bytes.
 pub unsafe fn bar<T>(x: T) {
     let p: *const u32 = &x as *const T as *const u32;
 
@@ -87,8 +88,10 @@ pub unsafe fn bar<T>(x: T) {
 In some cases, the safety requirements of unsafe callees are not directly propagated to the caller; instead, they may manifest as different safety obligations.
 ```rust
 /// # Safety: 
-/// - `x` must be properly aligned for `u32`, or
-/// - `x` <= 0
+/// - `x` <= 0 or 
+/// - the following two properties should be upheld:
+///   * `x` must be properly aligned for `u32`, and 
+///   * `T` must not have padding in its first 4 bytes.
 pub unsafe fn bar<T>(x: T) {
     let p: *const u32 = &x as *const T as *const u32;
 

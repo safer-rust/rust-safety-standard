@@ -281,7 +281,7 @@ Developers within the same module can easily create a `Vec` instance or modify `
 However, this risk may hopefully be mitigated in the near future through the use of [unsafe fields](https://rust-lang.github.io/rust-project-goals/2025h1/unsafe-fields.html) in the nearby future. 
 
 Such examples are also common in Rust-for-Linux, for instance [List](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L31-L266), as shown below. The type invariant can be enforced via the new constructor. However, developers working within the same module can bypass the invariant by using a struct literal.
-```
+```rust
 /// # Invariants
 ///
 /// * If the list is empty, then `first` is null. Otherwise, `first` points at the `ListLinks` field of the first element in the list.

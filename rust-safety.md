@@ -264,7 +264,7 @@ The basic unit of Rust software is a crate. Each crate can contain one or more m
   -  `pub(in path)`: the item is visible only within the specified module path.
   -  `pub(super)`: the item is visible to the parent module.
 
-Different levels of visibility affect the scope in which safety guarantees must hold. Below, we introduce several levels of soundness criteria used in real-world Rust projects:
+A program component can rely on visibility restrictions to maintain sound abstractions. Real-world Rust projects, however, may adopt different levels of soundness guarantees.
 - **Struct-level Soundness Criteria**: All uses of a struct’s safe items (or unsafe items when their safety requirements are satisfied) must not cause undefined behavior, even within the same module.
 
 This is the strongest criterion because all private methods and fields are accessible within the module.

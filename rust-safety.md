@@ -54,7 +54,7 @@ Therefore, they satisfy Function Comments Rule 2.
 
 When calling the unsafe function `foo`, the caller must check if all safety requirements are satisfied. 
 In the following example, the caller `bar` justifies why each of the safety requirements of `foo` is satisfied at the callsite in accordance with Function Comments Rule 3. 
-Since all the requirements are satisfied, `bar` can be declared as safe according to Function Safety Rule 1. 
+Since all the requirements are satisfied, `bar` can be declared as safe according to Function Safety Rule 2. 
 
 ```rust
 pub  fn bar() {

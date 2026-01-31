@@ -105,7 +105,7 @@ Besides function calls, operations such as raw pointer dereferencing, accessing 
 
 ## 3 Stucts
 
-A struct is a user-defined data type composed of named fields. Its behavior is defined through associated functions within `impl` blocks.
+A struct is a user-defined data type composed of fields. Its behavior is defined through associated functions within `impl` blocks.
 - A method is a special associated function that takes self as the first parameter.
 - Associated functions without a receiver are commonly used for constructors or type-level operations.
 - Struct instances can also be created using struct literals, e.g., `Foo { field1: value, ... }`.
@@ -264,8 +264,7 @@ The basic unit of Rust software is a crate. Each crate can contain one or more m
   -  `pub(in path)`: the item is visible only within the specified module path.
   -  `pub(super)`: the item is visible to the parent module.
 
-Visibility does not directly affect the Function Safety Rules, because whether a function can be declared safe is primarily determined by how it handles its unsafe callees. 
-However, visibility becomes more relevant when considering structs and traits, since different levels of visibility can influence the guarantees a type can provide.
+Different levels of visibility can influence the guarantees a type can provide.
 - **Stuct-level Safety Criteria**: All uses of a struct’s safe items (or unsafe items when their safety requirements are satisfied) must not cause undefined behavior, even within the same module.
 
 This is the strongest criterion because all private methods and fields are accessible within the module.

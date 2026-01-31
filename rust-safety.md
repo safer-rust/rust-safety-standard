@@ -132,7 +132,7 @@ The safety of a struct’s methods depends on whether they contain unsafe code:
 Note that type invariants play a key role in preventing the safety of methods from depending on the behavior of constructors, and vice versa.
  
 ### 3.2 Safety Comments
-- **Struct Comments Rule 1** (Recommended): Each struct with either unsafe constructors or unsafe methods should document the type invariant.
+- **Struct Comments Rule 1** (Recommended): Each struct with unsafe constructors should document the type invariant.
 - **Struct Comments Rule 2**: Each unsafe associated function should document its safety requirements:
   - 1) The requirements should not depend on other functions of the struct.
   - 2) They must be externally verifiable and must not depend on the function’s internal implementation.

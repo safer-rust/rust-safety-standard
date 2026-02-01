@@ -37,6 +37,47 @@ Note that the introduction of new unsafe code is discouraged unless necessary.
 Sometimes, introducing new unsafe functions can bring benefits and help avoid exposing additional unsafe functions.
 This is essential to prevent the proliferation of unsafe code and the degradation of overall safety in Rust projects.
 
+### 2.3 Decoupling
+To provide clearer and more actionable guidance, decoupling the relationships between safety responsibilities is very important. 
+One key decoupling strategy is to separate the safety of free functions and structs.
+In particular, a free function cannot create a struct instance except by using a constructor of the struct, and it cannot directly access the struct’s fields; all interactions should go through the struct’s methods, including the literal constructors.
+For example, in the following code, `new_even_unchecked` is a free function, not a constructor of the struct `EvenNumber`; the real constructor is the literal constructor of the tuple struct `EvenNumber()`:
+
+```rust
+pub struct EvenNumber(u32);
+
+/// # Safety
+/// - `x` must be even.
+pub unsafe fn new_even_unchecked(x: u32) -> EvenNumber {
+    EvenNumber(x)
+}
+```
+
+A better design is to place the unsafe function inside the `impl` block of the struct:
+```rust
+/// # Safety
+/// ## Struct invariant
+/// - `x` must be even.
+pub struct EvenNumber(u32);
+
+impl EvenNumber {
+    /// # Safety
+    /// - `x` must be even.
+    pub unsafe fn new_even_unchecked(x: u32) -> Self {
+        EvenNumber(x)
+    }
+}
+```
+
+Similarly, one may create objects of other types that enclose the struct, such as `Box<EvenNumber>`. These should also rely on the constructor of `EvenNumber`:
+```rust
+pub unsafe fn new_even_unchecked(x: u32) -> Box<EvenNumber> {
+    Box::new(EvenNumber::new_even_unchecked(x))
+}
+```
+
+In the same way, direct field assignments (e.g., `even_number.0 = ...`) can be treated as invoking the literal methods of the struct.
+
 ## 3 Free Functions
 A free function is a function defined at the module level that can be called directly by its path rather than through an instance or type.
 

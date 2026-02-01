@@ -41,7 +41,7 @@ This is essential to prevent the proliferation of unsafe code and the degradatio
 To provide clearer and more actionable guidance, decoupling the relationships between safety responsibilities is very important. 
 One key decoupling strategy is to separate the safety of free functions and structs.
 In particular, a free function cannot create a struct instance except by using a constructor of the struct, and it cannot directly access the struct’s fields; all interactions should go through the struct’s methods, including the literal constructors.
-For example, in the following code, `new_even_unchecked` is a free function, not a constructor of the struct `EvenNumber`; the real constructor is the literal constructor of the tuple struct `EvenNumber()`:
+For example, in the following code, we can treat `new_even_unchecked` as a free function that returns a an `EvenNumber` instance, instead of a constructor; the real constructor is the literal constructor of the tuple struct `EvenNumber()`:
 
 ```rust
 pub struct EvenNumber(u32);

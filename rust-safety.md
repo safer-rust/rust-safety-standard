@@ -146,7 +146,7 @@ They play a key role in preventing the safety of methods from depending on the b
 ### 4.1 Safety Rules
 
 - **Struct Safety Rule 1**: A constructor can be declared safe if it guarantees that the type invariant of the struct is satisfied; otherwise, it must be declared unsafe.
-- **Struct Safety Rule 2**: For associated functions without a receiver, their safety rules are generally the same with the safety rules defined for [free functions](#2-free-functions).
+- **Struct Safety Rule 2**: For associated functions without a receiver, their safety rules are generally the same with the safety rules defined for [free functions](#3-free-functions).
 - **Struct Safety Rule 3**: A method that contains no unsafe code can be declared safe if it does not violate the type invariant of the struct.
 - **Struct Safety Rule 4**: If a method contains unsafe code, it can be declared safe only if both of the following conditions are met:
   - 1) It does not violate the type invariant of the struct.

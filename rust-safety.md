@@ -19,7 +19,7 @@ Our recommendations are grounded in the theoretical foundation presented in [A T
 ## 2 Rationale
 ### 2.1 Definition of Unsafe
 In general, unsafe indicates that there are additional requirements imposed on the user. These requirements should be clearly documented to avoid misuse.
-- **Unsafe function**： a function is unsafe if it requires the caller to satisfy certain requirements.
+- **Unsafe function**: a function is unsafe if it requires the caller to satisfy certain requirements.
 - **Unsafe trait**: a trait is unsafe if it requires the implementer to satisfy certain requirements.
 
 These two concepts are orthogonal. 
@@ -33,8 +33,8 @@ In general, there are two scenarios in which a developer declares a function as 
 - **New unsafe (by design)**:  
   - Besides legacy unsafe, developers may deliberately introduces additional safety contracts that must be upheld by the caller in order to use the function safely.
 
-Note that the introduction of new unsafe code is discouraged unless necessary.  
-Sometimes, introducing new unsafe functions can bring benefits and help avoid exposing additional unsafe functions.  
+Note that the introduction of new unsafe code is discouraged unless necessary.
+Sometimes, introducing new unsafe functions can bring benefits and help avoid exposing additional unsafe functions.
 This is essential to prevent the proliferation of unsafe code and the degradation of overall safety in Rust projects.
 
 ## 3 Free Functions
@@ -134,26 +134,26 @@ A struct is a user-defined data type composed of fields. Its behavior is defined
 - Associated functions without a receiver are commonly used for constructors or type-level operations.
 - Struct instances can also be created using struct literals, e.g., `Foo { field1: value, ... }`.
 
+### Type Invariant
 A struct is a type that has a type invariant. 
 A type invariant specifies the conditions that all instances of the type must satisfy, regardless of which constructor is used to create them.
-Type invariants are widely used in Rust-for-Linux, e.g., [IovIterSource](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/iov.rs#L38-L49), [List](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L31-L266), [ListLinks](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L367-L375), [Cursor](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L945-L952), [CursorPeek](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L1100-L1107).
+Type invariants are widely used in Rust-for-Linux, e.g., [IovIterSource](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/iov.rs#L38-L49), [List](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L31-L266), [ListLinks](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L367-L375), [Cursor](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L945-L952), [CursorPeek](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L1100-L1107). 
+
+Type invariants are crucial to the safety of associated functions and should be clearly documented.
+Similar to unsafe, there are two types of invariants:
+- **Legacy invariants (mandatory)**: Associated functions contain unsafe code and rely on these invariants to avoid undefined behavior.
+- **New invariants (by design)**: The invariants are unrelated to unsafe code of the struct and are introduced intentionally by design.
+
+Type invariants play a key role in preventing the safety of methods from depending on the behavior of constructors, and vice versa.
 
 ### 4.1 Safety Rules
-- **Struct Safety Rule 1**: If none of the associated functions of a struct contain unsafe code, there is no mandatory contract to be upheld, and all associated functions can be declared safe, unless the developer explicitly chooses to declare them unsafe by design.
+
+- **Struct Safety Rule 1**: A constructor can be declared safe if it guarantees that the type invariant of the struct is satisfied; otherwise, it must be declared unsafe.
 - **Struct Safety Rule 2**: For associated functions without a receiver, their safety rules are generally the same with the safety rules defined for [free functions](#2-free-functions).
-
-If a constructor is safe, its use should always guarantee that the type invariants are upheld, forming the basis of Struct Safety Rule 3.
-In practice, the domain of the invariant can be defined with respect to the potential undefined behaviors that might be triggered by other methods.
-
-- **Struct Safety Rule 3**: A constructor can be declared safe if it guarantees that the type invariant of the struct is satisfied; otherwise, it must be declared unsafe.
-
-The safety of a struct’s methods depends on whether they contain unsafe code:
-- **Struct Safety Rule 4**: A method that contains no unsafe code can be declared safe if it does not violate the type invariant of the struct.
-- **Struct Safety Rule 5**: If a method contains unsafe code, it can be declared safe only if both of the following conditions are met:
+- **Struct Safety Rule 3**: A method that contains no unsafe code can be declared safe if it does not violate the type invariant of the struct.
+- **Struct Safety Rule 4**: If a method contains unsafe code, it can be declared safe only if both of the following conditions are met:
   - 1) It does not violate the type invariant of the struct.
   - 2) All safety requirements of its internal unsafe code are satisfied.
-   
-Note that type invariants play a key role in preventing the safety of methods from depending on the behavior of constructors, and vice versa.
  
 ### 4.2 Safety Comments
 - **Struct Comments Rule 1** (Recommended): Each struct with unsafe constructors should document the type invariant.

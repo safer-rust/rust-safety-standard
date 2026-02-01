@@ -26,12 +26,12 @@ These two concepts are orthogonal.
 
 ### 2.2 Design Choices
 In general, there are two scenarios in which a developer declares a function as unsafe.
-- **Legacy unsafe (mandatory)**:
+- **Dependent unsafe (mandatory)**:
   -  A free function invokes unsafe code from its dependencies, and the safety requirements of that unsafe code cannot be fully discharged by the function itself. As a result, the function must be declared unsafe to propagate the remaining safety requirements to its caller.
   -  An associated function may violate a struct’s type invariant, which can in turn affect other methods of the struct that rely on unsafe code. Regardless of whether it contains unsafe code, such a function should be declared unsafe, with safety requirements specifying how the invariant must be upheld.
   
 - **New unsafe (by design)**:  
-  - Besides legacy unsafe, developers may deliberately introduces additional safety contracts that must be upheld by the caller in order to use the function safely.
+  - Besides dependent unsafe, developers may deliberately introduces additional safety contracts that must be upheld by the caller in order to use the function safely.
 
 Note that the introduction of new unsafe code is discouraged unless necessary.
 Sometimes, introducing new unsafe functions can bring benefits and help avoid exposing additional unsafe functions.
@@ -178,7 +178,7 @@ A struct is a user-defined data type composed of fields. Its behavior is defined
 A struct can have a type invariant that specifies the conditions that all instances of the type must satisfy, regardless of which constructor is used to create them.
 Type invariants are crucial to the safety of associated functions and should be clearly documented. 
 Similar to unsafe, there are two types of invariants:
-- **Legacy invariants (mandatory)**: Associated functions contain unsafe code and rely on these invariants to avoid undefined behavior.
+- **Dependent invariants (mandatory)**: Associated functions contain unsafe code and rely on these invariants to avoid undefined behavior.
 - **New invariants (by design)**: The invariants are unrelated to unsafe code of the struct and are introduced intentionally by design.
 
 Type invariants are widely used in Rust-for-Linux, e.g., [IovIterSource](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/iov.rs#L38-L49), [List](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L31-L266), [ListLinks](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L367-L375), [Cursor](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L945-L952), [CursorPeek](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L1100-L1107).

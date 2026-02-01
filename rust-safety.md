@@ -134,17 +134,14 @@ A struct is a user-defined data type composed of fields. Its behavior is defined
 - Associated functions without a receiver are commonly used for constructors or type-level operations.
 - Struct instances can also be created using struct literals, e.g., `Foo { field1: value, ... }`.
 
-### Type Invariant
-A struct is a type that has a type invariant. 
-A type invariant specifies the conditions that all instances of the type must satisfy, regardless of which constructor is used to create them.
-Type invariants are widely used in Rust-for-Linux, e.g., [IovIterSource](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/iov.rs#L38-L49), [List](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L31-L266), [ListLinks](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L367-L375), [Cursor](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L945-L952), [CursorPeek](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L1100-L1107). 
-
-Type invariants are crucial to the safety of associated functions and should be clearly documented.
+A struct can have a type invariant that specifies the conditions that all instances of the type must satisfy, regardless of which constructor is used to create them.
+Type invariants are crucial to the safety of associated functions and should be clearly documented. 
 Similar to unsafe, there are two types of invariants:
 - **Legacy invariants (mandatory)**: Associated functions contain unsafe code and rely on these invariants to avoid undefined behavior.
 - **New invariants (by design)**: The invariants are unrelated to unsafe code of the struct and are introduced intentionally by design.
 
-Type invariants play a key role in preventing the safety of methods from depending on the behavior of constructors, and vice versa.
+Type invariants are widely used in Rust-for-Linux, e.g., [IovIterSource](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/iov.rs#L38-L49), [List](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L31-L266), [ListLinks](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L367-L375), [Cursor](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L945-L952), [CursorPeek](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L1100-L1107).
+They play a key role in preventing the safety of methods from depending on the behavior of constructors, and vice versa.
 
 ### 4.1 Safety Rules
 

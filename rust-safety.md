@@ -40,7 +40,8 @@ This is essential to prevent the proliferation of unsafe code and the degradatio
 ### 2.3 Decoupling
 To provide clearer and more actionable guidance, decoupling the relationships between safety responsibilities is very important. 
 One key decoupling strategy is to separate the safety of free functions and structs.
-In particular, we conceptually treat struct construction and field access as follows: a free function creates a struct instance only via the struct’s constructors (including literal constructors), and direct field access is modeled as an invocation of the struct’s literal methods.
+In particular, we conceptually treat struct construction and field access as follows: a free function creates a struct instance only via the struct’s constructors (including struct literals), and any direct field access is modeled as an invocation of the struct’s implicit methods.
+
 For example, in the following code, we can treat `new_even_unchecked` as a free function that returns a an `EvenNumber` instance, instead of a constructor; the real constructor is the literal constructor of the tuple struct `EvenNumber()`:
 
 ```rust
@@ -84,8 +85,10 @@ A free function is a function defined at the module level that can be called dir
 ### 3.1 Safety Rules
 The soundness of free functions is relatively straightforward to justify.
 
-- **Function Safety Rule 1**: If a free function contains no unsafe code, there is no mandatory contract to be upheld, and it is therefore safe, unless the developer explicitly chooses to declare it unsafe by design.
-- **Function Safety Rule 2**: If a free function contains unsafe code, it can be declared safe only if all conditions required for the safe use of that unsafe code are met.
+- **Function Safety Rule 1**: If a free function contains unsafe code, it can be declared safe only if all conditions required for the safe use of that unsafe code are met.
+- **Function Safety Rule 2**: If a free function contains no unsafe code, there is no mandatory contract to be upheld, and it can be declared safe.
+
+Note that Function Safety Rule 2 continues to hold even when the function calls other functions that contain unsafe code, provided that those callees themselves satisfy Function Safety Rule 1 and do not impose additional safety contracts.
 
 ## 3.2 Safety Comments
 There are two mandatory rules and one recommended practice for documenting the safety requirements of free functions:
@@ -97,7 +100,7 @@ There are two mandatory rules and one recommended practice for documenting the s
 
 The following function `foo` performs a raw pointer dereference, which is an unsafe operation. 
 The raw pointer `r` is derived from the function parameter `p`, and the function does not check whether it is valid before dereferencing it. 
-According to Function Safety Rule 2, foo must be declared unsafe.
+According to Function Safety Rule 1, foo must be declared unsafe.
 
 ```rust
 /// # Safety:
@@ -116,7 +119,7 @@ Therefore, they satisfy Function Comments Rule 2.
 
 When calling the unsafe function `foo`, the caller must check if all safety requirements are satisfied. 
 In the following example, the caller `bar` justifies why each of the safety requirements of `foo` is satisfied at the callsite in accordance with Function Comments Rule 3. 
-Since all the requirements are satisfied, `bar` can be declared as safe according to Function Safety Rule 2. 
+Since all the requirements are satisfied, `bar` can be declared safe according to Function Safety Rule 1. 
 
 ```rust
 pub  fn bar() {

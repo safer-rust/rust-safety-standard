@@ -151,7 +151,7 @@ This reflects the fact that, even though the function is not part of the public 
 The two criteria differ only in scope. 
 Some systems may nevertheless prefer such safety criteria because certain APIs are designed for specific usage contexts and can rely on global or system state to ensure safety. 
 
-## 4 Free Functions
+## 4 Rules for Free Functions
 A free function is a function defined at the module level that can be called directly by its path rather than through an instance or type.
 
 ### 4.1 Safety Rules
@@ -245,7 +245,7 @@ pub unsafe fn bar<T>(x: T) {
 Besides function calls, operations such as raw pointer dereferencing, accessing static mut values, and reading or writing union fields can be treated in the same way as unsafe callees with specific safety requirements, and the same rules apply.
 
 
-## 5 Stucts
+## 5 Rules for Stucts
 
 A struct is a user-defined data type composed of fields. Its behavior is defined through associated functions within `impl` blocks.
 - A method is a special associated function that takes self as the first parameter.
@@ -354,7 +354,7 @@ impl Foo {
 
 Both implementations satisfy Rust’s soundness requirement. For the first type, examples can be found in the Rust standard library, such as [DwarfReader](https://github.com/rust-lang/rust/blob/7d8ebe3128fc87f3da1ad64240e63ccf07b8f0bd/library/std/src/sys/personality/dwarf/mod.rs#L15-L69) and [Unique](https://github.com/rust-lang/rust/blob/7d8ebe3128fc87f3da1ad64240e63ccf07b8f0bd/library/core/src/ptr/unique.rs#L94-L156); the second type is commonly used in Rust-for-Linux, with examples including [IovIterSource](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/iov.rs#L38-L49), [Resource](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/io/resource.rs#L75-L169), and [Bitmap](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/bitmap.rs#L17-L90).
 
-## 6 Traits
+## 6 Rules for Traits
 A trait defines a collection of associated items (typically functions) that can be shared across multiple types. Traits may provide default implementations for some items; these implementations are automatically available to implementing types unless explicitly overridden.
 - When a type implements a trait, the trait’s functions behave like associated functions of the type.
 - Similar to those introduced in structs, these associated functions may or may not have a receiver.

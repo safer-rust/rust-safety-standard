@@ -80,13 +80,13 @@ pub unsafe fn new_even_unchecked(x: u32) -> Box<EvenNumber> {
 In the same way, direct field assignments (e.g., `even_number.0 = ...`) can be treated as invoking the literal methods of the struct.
 
 ## 3 Establish Soundness Criteria
-Existing soundness criteria require only that safe code cannot cause Undefined Behavior, but they do not precisely specify the scope in which such usage is considered.
+Existing soundness criteria require only that safe code cannot cause undefined behavior, but they do not clearly specify the scope in which such code usage is considered. 
+[Visibility](https://doc.rust-lang.org/reference/visibility-and-privacy.html) plays a critical role in soundness, because it determines which and how APIs are accessible.
 
 Therefore, the first step for a Rust project to follow this standard is to establish a visibility-aware soundness criterion that enables systematic soundness auditing.
 
 ### 3.1 Visibility
 The basic unit of Rust software is a crate. Each crate can contain one or more modules, which in turn can contain submodules, forming a tree-like structure.
-[Visibility](https://doc.rust-lang.org/reference/visibility-and-privacy.html) plays a critical role in ensuring safety, because it determines which and how APIs are accessible.
 - Module-based visibility:
   - By default, functions, structs, and struct fields are only visible within the module in which they are defined (i.e., private).
   - Exception: Items of a public trait are automatically public, regardless of whether they are explicitly marked `pub`; variants of enumeration types are public if the enum itself is public.

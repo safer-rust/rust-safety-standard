@@ -25,7 +25,7 @@ In general, unsafe indicates that there are additional requirements imposed on t
 These two concepts are orthogonal. 
 
 ### 2.2 Design Choices
-In general, there are two scenarios in which a developer declares a function as unsafe.
+In general, there are two scenarios in which a developer declares a function unsafe.
 - **Dependent unsafe (mandatory)**:
   -  A free function invokes unsafe code from its dependencies, and the safety requirements of that unsafe code cannot be fully discharged by the function itself. As a result, the function must be declared unsafe to propagate the remaining safety requirements to its caller.
   -  An associated function may violate a struct’s type invariant, which can in turn affect other methods of the struct that rely on unsafe code. Regardless of whether it contains unsafe code, such a function should be declared unsafe, with safety requirements specifying how the invariant must be upheld.
@@ -142,7 +142,7 @@ impl<T: ?Sized + ListItem<ID>, const ID: u64> List<T, ID> {
 ```
 
 Note that under the (Weak) Struct-level Soundness Criterion, structs and their associated functions does not rely on visibility restrictions to maintain soundness, since they may be accessed by other code within the same module.
-For example, in Rust-for-Linux’s `List`, the private method [insert_inner](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L489-L531) is declared as unsafe. 
+For example, in Rust-for-Linux’s `List`, the private method [insert_inner](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L489-L531) is declared unsafe. 
 This reflects the fact that, even though the function is not part of the public API, if its correct use depends on invariants that cannot be enforced by the type system alone, it must be declared unsafe.
 
 - **Module-level Soundness Criterion**: All uses of the module’s public safe items (or unsafe items when their safety requirements are satisfied) from outside the module must not cause undefined behavior.
@@ -287,7 +287,7 @@ struct Foo<'a> {
 }
 ```
 
-One possible design is to declare the constructor as safe while marking other methods as unsafe. 
+One possible design is to declare the constructor safe while marking other methods unsafe. 
 In this case, this type does not maintain a validity invariant.
 Instead, each unsafe method defines the conditions required for safe use.
 ```rust
@@ -360,7 +360,7 @@ A trait defines a collection of associated items (typically functions) that can 
 - Similar to those introduced in structs, these associated functions may or may not have a receiver.
 
 ### 6.1 Safety Rules
-- **Trait Safety Rule 1**: Declare a trait as unsafe when the correctness of its implementations is required to prevent undefined behavior in safe code.
+- **Trait Safety Rule 1**: Declare a trait unsafe when the correctness of its implementations is required to prevent undefined behavior in safe code.
 - **Trait Safety Rule 2**: A trait method should be unsafe if its correct use depends on safety guarantees that must be enforced by the caller.
 
 ### 5.2 Safety Comments
@@ -375,8 +375,8 @@ A trait defines a collection of associated items (typically functions) that can 
 
 ### 6.3 Example Cases
 
-The following example introduces a trait `Buffer` that should be declared as unsafe, because incorrectly implementing it may introduce undefined behavior. 
-The trait defines an unsafe method `get_unchecked`. It cannot be declared as safe because its safety requirements cannot be guaranteed solely by the trait invariant.
+The following example introduces a trait `Buffer` that should be declared unsafe, because incorrectly implementing it may introduce undefined behavior. 
+The trait defines an unsafe method `get_unchecked`. It cannot be declared safe because its safety requirements cannot be guaranteed solely by the trait invariant.
 ```rust
 /// # Safety:
 /// ## Trait invariant: 

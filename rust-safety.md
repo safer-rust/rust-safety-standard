@@ -84,7 +84,7 @@ Existing soundness criteria require only that safe code cannot cause Undefined B
 
 Therefore, the first step for a Rust project to follow this standard is to establish a visibility-aware soundness criterion that enables systematic soundness auditing.
 
-### Visibility
+### 3.1 Visibility
 The basic unit of Rust software is a crate. Each crate can contain one or more modules, which in turn can contain submodules, forming a tree-like structure.
 [Visibility](https://doc.rust-lang.org/reference/visibility-and-privacy.html) plays a critical role in ensuring safety, because it determines which and how APIs are accessible.
 - Module-based visibility:
@@ -98,7 +98,7 @@ The basic unit of Rust software is a crate. Each crate can contain one or more m
 
 A program component can rely on visibility restrictions to maintain sound abstractions. Real-world Rust projects, however, may adopt different levels of soundness guarantees.
 
-### Visibility-based Soundness Criteria
+### 3.2 Visibility-based Soundness Criteria
 - **Struct-level Soundness Criterion**: All uses of a struct’s safe items (or unsafe items when their safety requirements are satisfied) must not cause undefined behavior, even within the same module.
 
 This is the strongest criterion because all private methods and fields are accessible within the module.

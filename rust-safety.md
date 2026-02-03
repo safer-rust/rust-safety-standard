@@ -79,7 +79,7 @@ pub unsafe fn new_even_unchecked(x: u32) -> Box<EvenNumber> {
 
 In the same way, direct field assignments (e.g., `even_number.0 = ...`) can be treated as invoking the literal methods of the struct.
 
-## 3 Establish Soundness Criteria
+## 3 Establish A Soundness Criterion
 Existing soundness criteria require only that safe code cannot cause undefined behavior, but they do not clearly specify the scope in which such code usage is considered. 
 [Visibility](https://doc.rust-lang.org/reference/visibility-and-privacy.html) plays a critical role in soundness, because it determines which and how APIs are accessible.
 

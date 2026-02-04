@@ -106,7 +106,7 @@ The project owner may select the soundness guarantees that best suit their proje
 
 This is the default soundness criterion adopted by the Rust standard library, as a module represents the smallest unit of accessibility control.
 
-For example, code within the same module is considered sound even if it stores an arbitrary raw pointer into HOOK using only safe code. 
+For example, the following code is considered sound even if it is possible to store an arbitrary raw pointer into HOOK using only safe code. 
 This criterion has been confirmed by the library team in [issues/152078](https://github.com/rust-lang/rust/issues/152078).
 ```rust
 static HOOK: AtomicPtr<()> = AtomicPtr::new(ptr::null_mut());

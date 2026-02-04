@@ -144,7 +144,7 @@ pub struct Vec<T, #[unstable(feature = "allocator_api", issue = "32838")] A: All
 }
 ```
 
-### Principle of Least Scope of Soundness 
+### 3.3 Principle of Least Scope of Soundness 
 
 The soundness criterion serves as the last line of defense against undefined behavior. 
 Whenever possible, safety should be ensured earlier by restricting the scope of unsafe code or enforcing invariants locally.

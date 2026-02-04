@@ -102,57 +102,56 @@ A program component can rely on visibility restrictions to maintain sound abstra
 Before determining whether each function should be declared safe or unsafe, the project owner should be explicit about which criterion is being adopted, as it guides the subsequent rules for soundness checking. 
 The project owner may select the soundness guarantees that best suit their project.
 
-- **Struct-level Soundness Criterion**: All uses of a struct’s safe items (or unsafe items when their safety requirements are satisfied) must not cause undefined behavior, even within the same module.
+- **Module-level Soundness Criterion** (default): All uses of a module’s public safe items (or unsafe items, provided their safety requirements are met) from outside the module must not lead to undefined behavior.
 
-This is the strongest criterion. 
+This is the default soundness criterion adopted by the Rust standard library, as a module represents the smallest unit of accessibility control.
+
+For example, code within the same module is considered sound even if it stores an arbitrary raw pointer into HOOK using only safe code. 
+This criterion has been confirmed by the library team in [issues/152078](https://github.com/rust-lang/rust/issues/152078).
+```rust
+static HOOK: AtomicPtr<()> = AtomicPtr::new(ptr::null_mut());
+
+pub fn rust_oom(layout: Layout) -> ! { 
+     crate::sys::backtrace::__rust_end_short_backtrace(|| { 
+         let hook = HOOK.load(Ordering::Acquire); 
+         let hook: fn(Layout) = 
+             if hook.is_null() { default_alloc_error_hook } else { unsafe { mem::transmute(hook) } }; 
+         hook(layout); 
+         crate::process::abort() 
+     }) 
+ } 
+```
+
+- **Crate-level Soundness Criterion** (relaxed): All uses of the crate’s public safe items (or unsafe items when their safety requirements are satisfied) from outside the crate must not cause undefined behavior.
+
+This is a more relaxed criterion while still providing soundness guarantees.
+Some systems may nevertheless prefer such safety criteria because certain APIs are designed for specific usage contexts and can rely on global or system state to ensure safety.
+
+- **Struct-level Soundness Criterion** (stricter): All uses of a struct’s safe items (or unsafe items when their safety requirements are satisfied) must not cause undefined behavior, even within the same module.
+
+This is the most strict criterion. 
 Since all private methods and fields are accessible within a module, a struct cannot rely on visibility to prevent misuse from code in the same module.
-Ensuring this can be challenging, particularly when considering struct literals, which allow creation of instances without going through constructors that uphold the type invariant.
+It is equivelent to the module-level soundness criterion if the module has only one struct.
 
-- **Weak Struct-level Soundness Criterion**: This criterion ignores the risk that a type instance could be created or modified via a struct literal that violates the struct’s invariant.
-
-This criterion is the one most commonly employed by the Rust standard library. 
-For example, [Vec](https://github.com/rust-lang/rust/blob/7d8ebe3128fc87f3da1ad64240e63ccf07b8f0bd/library/alloc/src/vec/mod.rs#L440) is defined as follows: 
+Ensuring struct-level soundness can be challenging, particularly when considering struct literals, which allow creation of instances without going through constructors that uphold the type invariant.
+This might be achievable in the future through the use of [unsafe fields](https://rust-lang.github.io/rust-project-goals/2025h1/unsafe-fields.html). 
+For example, [Vec](https://github.com/rust-lang/rust/blob/7d8ebe3128fc87f3da1ad64240e63ccf07b8f0bd/library/alloc/src/vec/mod.rs#L440) is defined as follows. 
+Developers within the same module can easily create a `Vec` instance or modify `len` via struct literals in ways that violate the type invariant.
 ```rust
 pub struct Vec<T, #[unstable(feature = "allocator_api", issue = "32838")] A: Allocator = Global> {
     buf: RawVec<T, A>,
     len: usize,
 }
 ```
-Developers within the same module can easily create a `Vec` instance or modify `len` via struct literals in ways that violate the type invariant. 
-However, this risk may be mitigated in the future through the use of [unsafe fields](https://rust-lang.github.io/rust-project-goals/2025h1/unsafe-fields.html). 
 
-Such examples are also common in Rust-for-Linux, for instance [List](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L31-L266), as shown below. The type invariant can be enforced via the new constructor. However, developers working within the same module can bypass the invariant by using a struct literal.
-```rust
-/// # Invariants
-///
-/// * If the list is empty, then `first` is null. Otherwise, `first` points at the `ListLinks` field of the first element in the list.
-/// * All prev/next pointers in `ListLinks` fields of items in the list are valid and form a cycle.
-/// * For every item in the list, the list owns the associated [`ListArc`] reference and has exclusive access to the `ListLinks` field.
-pub struct List<T: ?Sized + ListItem<ID>, const ID: u64 = 0> {
-    first: *mut ListLinksFields,
-    _ty: PhantomData<ListArc<T, ID>>,
-}
+### Principle of Least Scope of Soundness 
 
-impl<T: ?Sized + ListItem<ID>, const ID: u64> List<T, ID> {
-    /// Creates a new empty list.
-    pub const fn new() -> Self {
-        Self {
-            first: ptr::null_mut(),
-            _ty: PhantomData,
-        }
-    }
-}
-```
+The soundness criterion serves as the last line of defense against undefined behavior. 
+Whenever possible, safety should be ensured earlier by restricting the scope of unsafe code or enforcing invariants locally.
 
-Note that under the (Weak) Struct-level Soundness Criterion, structs and their associated functions does not rely on visibility restrictions to maintain soundness, since they may be accessed by other code within the same module.
-For example, in Rust-for-Linux’s `List`, the private method [insert_inner](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L489-L531) is declared unsafe. 
-This reflects the fact that, even though the function is not part of the public API, if its correct use depends on invariants that cannot be enforced by the type system alone, it must be declared unsafe.
+For example, in Rust-for-Linux’s `List`, the private method [insert_inner](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L489-L531) is declared unsafe with clearly documented safety requirements to prevent misuse. 
+This demonstrates that even if a function is not part of the public API, it is recommended to mark it unsafe when its correct use depends on invariants that cannot be enforced by the type system alone.
 
-- **Module-level Soundness Criterion**: All uses of the module’s public safe items (or unsafe items when their safety requirements are satisfied) from outside the module must not cause undefined behavior.
-- **Crate-level Soundness Criterion**: All uses of the crate’s public safe items (or unsafe items when their safety requirements are satisfied) from outside the crate must not cause undefined behavior.
-
-The two criteria differ only in scope. 
-Some systems may nevertheless prefer such safety criteria because certain APIs are designed for specific usage contexts and can rely on global or system state to ensure safety. 
 
 ## 4 Rules for Free Functions
 A free function is a function defined at the module level that can be called directly by its path rather than through an instance or type.

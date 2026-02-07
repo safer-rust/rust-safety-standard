@@ -33,6 +33,44 @@ In general, there are two scenarios in which a developer declares a function uns
 - **New unsafe (by design)**:  
   - Besides dependent unsafe, developers may deliberately introduces additional safety contracts that must be upheld by the caller in order to use the function safely.
 
+When there is confusion about whether a function should be declared safe or unsafe, remember that safety invariants come before `unsafe`.
+Using `unsafe` means that a function may violate some safety invariants if it is misused.
+
+In the following example, whether `new_unchecked` should be safe or unsafe depends on whether the type explicitly declares a safety invariant that `x` must be even.
+If such an invariant is part of the type’s contract, then `new_unchecked` must be declared `unsafe`, since incorrect usage can violate the invariant.
+If such invariant does not exist, then `new_unchecked` is safe, as misuse does not violate any safety invariant.
+
+Therefore, both versions below are sound, but they correspond to different design choices regarding the type’s invariants.
+
+```rust
+/// # Safety
+/// ## Struct invariant
+/// - `x` must be even.
+pub struct EvenNumber {
+  val: u32,
+}
+
+impl EvenNumber {
+    /// # Safety
+    /// - `x` must be even.
+    pub unsafe fn new_unchecked(x: u32) -> Self {
+        EvenNumber{x}
+    }
+}
+```
+
+```rust
+pub struct EvenNumber {
+  val: u32,
+}
+
+impl EvenNumber {
+    pub fn new_unchecked(x: u32) -> Self {
+        EvenNumber{x}
+    }
+}
+```
+
 Note that the introduction of new unsafe code is discouraged unless necessary.
 Sometimes, introducing new unsafe functions can bring benefits and help avoid exposing additional unsafe functions.
 This is essential to prevent the proliferation of unsafe code and the degradation of overall safety in Rust projects.
@@ -42,14 +80,14 @@ To provide clearer and more actionable guidance, decoupling the relationships be
 One key decoupling strategy is to separate the safety of free functions and structs.
 In particular, we conceptually treat struct construction and field access as follows: a free function creates a struct instance only via the struct’s constructors (including struct literals), and any direct field access is modeled as an invocation of the struct’s implicit methods.
 
-For example, in the following code, we can treat `new_even_unchecked` as a free function that returns a an `EvenNumber` instance, instead of a constructor; the real constructor is the literal constructor of the tuple struct `EvenNumber()`:
+For example, in the following code, we can treat `new_unchecked` as a free function that returns a an `EvenNumber` instance, instead of a constructor; the real constructor is the literal constructor of the tuple struct `EvenNumber()`:
 
 ```rust
 pub struct EvenNumber(u32);
 
 /// # Safety
 /// - `x` must be even.
-pub unsafe fn new_even_unchecked(x: u32) -> EvenNumber {
+pub unsafe fn new_unchecked(x: u32) -> EvenNumber {
     EvenNumber(x)
 }
 ```
@@ -64,7 +102,7 @@ pub struct EvenNumber(u32);
 impl EvenNumber {
     /// # Safety
     /// - `x` must be even.
-    pub unsafe fn new_even_unchecked(x: u32) -> Self {
+    pub unsafe fn new_unchecked(x: u32) -> Self {
         EvenNumber(x)
     }
 }
@@ -72,7 +110,7 @@ impl EvenNumber {
 
 Similarly, one may create objects of other types that enclose the struct, such as `Box<EvenNumber>`. These should also rely on the constructor of `EvenNumber`:
 ```rust
-pub unsafe fn new_even_unchecked(x: u32) -> Box<EvenNumber> {
+pub unsafe fn new_unchecked(x: u32) -> Box<EvenNumber> {
     Box::new(EvenNumber::new_even_unchecked(x))
 }
 ```

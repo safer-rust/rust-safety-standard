@@ -110,7 +110,7 @@ impl EvenNumber {
 Similarly, one may create objects of other types that enclose the struct, such as `Box<EvenNumber>`. These should also rely on the constructor of `EvenNumber`:
 ```rust
 pub unsafe fn new_unchecked(x: u32) -> Box<EvenNumber> {
-    Box::new(EvenNumber::new_even_unchecked(x))
+    Box::new(EvenNumber::new_unchecked(x))
 }
 ```
 

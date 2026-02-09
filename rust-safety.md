@@ -24,7 +24,11 @@ In general, unsafe indicates that there are additional requirements imposed on t
 
 These two concepts are orthogonal. 
 
-### 2.2 Design Choices
+### 2.2 Safety Documentation
+- **Define unsafe code**: Safety requirements should be provided alongside each unsafe definition as comments or documents. They should state sufficient conditions to prevent undefined behavior when using the unsafe code, and may also describe discouraged usage patterns that are known to lead to undefined behavior.
+- **Use unsafe code**: When using unsafe code, developers must provide comments justifying why the relevant safety requirements are upheld.
+
+### 2.3 Design Choices
 In general, there are two scenarios in which a developer declares a function unsafe.
 - **Dependent unsafe (mandatory)**:
   -  A free function invokes unsafe code from its dependencies, and the safety requirements of that unsafe code cannot be fully discharged by the function itself. As a result, the function must be declared unsafe to propagate the remaining safety requirements to its caller.
@@ -71,16 +75,14 @@ impl EvenNumber {
 ```
 
 For example, in the Rust standard library, [`RawWaker`](https://doc.rust-lang.org/core/task/struct.RawWaker.html) and [`RawWakerVTable`](https://doc.rust-lang.org/core/task/struct.RawWakerVTable.html) are types without type invariants and currently contain no internal unsafe code. 
-Therefore, their constructors `new` are both declared safe.  
-
-These structs are then used by [`LocalWaker`](https://doc.rust-lang.org/core/task/struct.LocalWaker.html), which enforces the type invariants. As a result, its constructors [`new`](https://doc.rust-lang.org/core/task/struct.LocalWaker.html#method.new) and [`from_raw`](https://doc.rust-lang.org/core/task/struct.LocalWaker.html#method.from_raw) are declared unsafe.
+Therefore, their constructors `new` are both declared safe. These structs are then used by [`LocalWaker`](https://doc.rust-lang.org/core/task/struct.LocalWaker.html), which enforces the type invariants. As a result, its constructors [`new`](https://doc.rust-lang.org/core/task/struct.LocalWaker.html#method.new) and [`from_raw`](https://doc.rust-lang.org/core/task/struct.LocalWaker.html#method.from_raw) are declared unsafe.
 
 
 Note that the introduction of new unsafe code is discouraged unless necessary.
 Sometimes, introducing new unsafe functions can bring benefits and help avoid exposing additional unsafe functions.
 This is essential to prevent the proliferation of unsafe code and the degradation of overall safety in Rust projects.
 
-### 2.3 Decoupling
+### 2.4 Decoupling
 To provide clearer and more actionable guidance, decoupling the relationships between safety responsibilities is very important. 
 One key decoupling strategy is to separate the safety of free functions and structs.
 In particular, we conceptually treat struct construction and field access as follows: a free function creates a struct instance only via the struct’s constructors (including struct literals), and any direct field access is modeled as an invocation of the struct’s implicit methods.

@@ -32,7 +32,7 @@ In general, there are two scenarios in which a developer declares a function uns
   
 - **New unsafe (by design)**:  
   - Besides dependent unsafe, developers may deliberately introduces additional safety contracts that must be upheld by the caller in order to use the function safely.
-  - When there is confusion about whether a function should be declared safe or unsafe, remember that safety invariants come before `unsafe`.
+  - When there is confusion about whether a function should be declared safe or unsafe, remember that safety invariants always go before `unsafe`.
 Using `unsafe` means that a function may violate some safety invariants if it is misused.
 
 In the following example, whether `new_unchecked` should be safe or unsafe depends on whether the type explicitly declares a safety invariant that `x` must be even.

@@ -73,7 +73,7 @@ impl EvenNumber {
 For example, in the Rust standard library, [`RawWaker`](https://doc.rust-lang.org/core/task/struct.RawWaker.html) and [`RawWakerVTable`](https://doc.rust-lang.org/core/task/struct.RawWakerVTable.html) are types without type invariants and currently contain no internal unsafe code. 
 Therefore, their constructors `new` are both declared safe.  
 
-These structs are then used by [`Waker`](https://doc.rust-lang.org/core/task/struct.Waker.htm), which enforces the type invariants. As a result, its constructors [`new`](https://doc.rust-lang.org/core/task/struct.Waker.html#method.new) and [`from_raw`](https://doc.rust-lang.org/core/task/struct.Waker.html#method.from_raw) are declared unsafe.
+These structs are then used by [`LocalWaker`](https://doc.rust-lang.org/core/task/struct.LocalWaker.html), which enforces the type invariants. As a result, its constructors [`new`](https://doc.rust-lang.org/core/task/struct.LocalWaker.html#method.new) and [`from_raw`](https://doc.rust-lang.org/core/task/struct.LocalWaker.html#method.from_raw) are declared unsafe.
 
 
 Note that the introduction of new unsafe code is discouraged unless necessary.

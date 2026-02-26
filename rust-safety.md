@@ -126,7 +126,7 @@ By default, a module is the smallest visibility boundary: all functions, structs
 Developer can rely on the visibility restrictions to maintain sound abstractions, i.e., all uses of a module’s public safe items (or unsafe items, provided their safety requirements are met) from outside the module must not lead to undefined behavior.
 This is the default soundness criterion adopted by the Rust standard library, as confirmed by the library team in [issues/152078](https://github.com/rust-lang/rust/issues/152078).
 
-For example, the following code snippet is considered sound even if it is possible to store an arbitrary raw pointer into HOOK using only safe code. 
+For example, the following code snippet is considered sound even if it is possible to store an arbitrary raw pointer into `HOOK` using only safe code. 
 This criterion .
 ```rust
 static HOOK: AtomicPtr<()> = AtomicPtr::new(ptr::null_mut());

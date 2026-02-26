@@ -120,7 +120,7 @@ pub unsafe fn new_unchecked(x: u32) -> Box<EvenNumber> {
 ```
 
 
-## 2.5 Visibility and Soundness
+### 2.5 Visibility and Soundness
 In Rust, soundness is tied to [Visibility](https://doc.rust-lang.org/reference/visibility-and-privacy.html), because it determines which and how APIs are accessible.
 By default, a module is the smallest visibility boundary: all functions, structs, and struct fields are private to the module unless explicitly made public.
 Developer can rely on the visibility restrictions to maintain sound abstractions, i.e., all uses of a module’s public safe items (or unsafe items, provided their safety requirements are met) from outside the module must not lead to undefined behavior.
@@ -147,10 +147,10 @@ Whenever possible, safety should be ensured earlier by restricting the scope of 
 For example, in Rust-for-Linux’s `List`, the private method [insert_inner](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L489-L531) is declared unsafe with clearly documented safety requirements to prevent misuse. 
 This demonstrates that even if a function is not part of the public API, it is recommended to mark it unsafe when its correct use depends on invariants that cannot be enforced by the type system alone.
 
-## 4 Rules for Free Functions
+## 3 Rules for Free Functions
 A free function is a function defined at the module level that can be called directly by its path rather than through an instance or type.
 
-### 4.1 Safety Rules
+### 3.1 Safety Rules
 The soundness of free functions is relatively straightforward to justify.
 
 - **Function Safety Rule 1**: If a free function contains unsafe code, it can be declared safe only if all conditions required for the safe use of that unsafe code are met.
@@ -158,13 +158,13 @@ The soundness of free functions is relatively straightforward to justify.
 
 Note that Function Safety Rule 2 continues to hold even when the function calls other functions that contain unsafe code, provided that those callees themselves satisfy Function Safety Rule 1 and do not impose additional safety contracts.
 
-## 4.2 Safety Comments
+## 3.2 Safety Comments
 There are two mandatory rules and one recommended practice for documenting the safety requirements of free functions:
 - **Function Comments Rule 1**: All unsafe functions must document their safety requirements.
 - **Function Comments Rule 2**: Safety requirements must be externally verifiable and must not depend on the function’s internal implementation.
 - **Function Comments Rule 3** (Recommended):  At the callsite of unsafe code, users are encouraged to justify why the safety requirements are satisfied.
 
-### 4.3 Example Cases
+### 3.3 Example Cases
 
 The following function `foo` performs a raw pointer dereference, which is an unsafe operation. 
 The raw pointer `r` is derived from the function parameter `p`, and the function does not check whether it is valid before dereferencing it. 
@@ -240,7 +240,7 @@ pub unsafe fn bar<T>(x: T) {
 
 Besides function calls, operations such as raw pointer dereferencing, accessing static mut values, and reading or writing union fields can be treated in the same way as unsafe callees with specific safety requirements, and the same rules apply.
 
-## 5 Rules for Stucts
+## 4 Rules for Stucts
 
 A struct is a user-defined data type composed of fields. Its behavior is defined through associated functions within `impl` blocks.
 - A method is a special associated function that takes self as the first parameter.
@@ -256,7 +256,7 @@ Similar to unsafe, there are two types of invariants:
 Type invariants are widely used in Rust-for-Linux, e.g., [IovIterSource](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/iov.rs#L38-L49), [List](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L31-L266), [ListLinks](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L367-L375), [Cursor](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L945-L952), [CursorPeek](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L1100-L1107).
 They play a key role in preventing the safety of methods from depending on the behavior of constructors, and vice versa.
 
-### 5.1 Safety Rules
+### 4.1 Safety Rules
 
 - **Struct Safety Rule 1**: A constructor can be declared safe if it guarantees that the type invariant of the struct is satisfied; otherwise, it must be declared unsafe.
 - **Struct Safety Rule 2**: For associated functions without a receiver, their safety rules are generally the same with the safety rules defined for [free functions](#3-free-functions).
@@ -265,14 +265,14 @@ They play a key role in preventing the safety of methods from depending on the b
   - 1) It does not violate the type invariant of the struct.
   - 2) All safety requirements of its internal unsafe code are satisfied.
  
-### 5.2 Safety Comments
+### 4.2 Safety Comments
 - **Struct Comments Rule 1** (Recommended): Each struct with unsafe constructors should document the type invariant.
 - **Struct Comments Rule 2**: Each unsafe associated function should document its safety requirements:
   - 1) The requirements should not depend on other functions of the struct.
   - 2) They must be externally verifiable and must not depend on the function’s internal implementation.
 - **Struct Comments Rule 3** (Recommended):  At the callsite of unsafe code, users are encouraged to justify why the safety requirements are satisfied.
 
-### 5.3 Example Cases
+### 4.3 Example Cases
 
 Consider the following struct, there are different ways to declare the safety of its associated functions.
 ```rust
@@ -349,16 +349,16 @@ impl Foo {
 
 Both implementations satisfy Rust’s soundness requirement. For the first type, examples can be found in the Rust standard library, such as [DwarfReader](https://github.com/rust-lang/rust/blob/7d8ebe3128fc87f3da1ad64240e63ccf07b8f0bd/library/std/src/sys/personality/dwarf/mod.rs#L15-L69) and [Unique](https://github.com/rust-lang/rust/blob/7d8ebe3128fc87f3da1ad64240e63ccf07b8f0bd/library/core/src/ptr/unique.rs#L94-L156); the second type is commonly used in Rust-for-Linux, with examples including [IovIterSource](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/iov.rs#L38-L49), [Resource](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/io/resource.rs#L75-L169), and [Bitmap](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/bitmap.rs#L17-L90).
 
-## 6 Rules for Traits
+## 5 Rules for Traits
 A trait defines a collection of associated items (typically functions) that can be shared across multiple types. Traits may provide default implementations for some items; these implementations are automatically available to implementing types unless explicitly overridden.
 - When a type implements a trait, the trait’s functions behave like associated functions of the type.
 - Similar to those introduced in structs, these associated functions may or may not have a receiver.
 
-### 6.1 Safety Rules
+### 5.1 Safety Rules
 - **Trait Safety Rule 1**: Declare a trait unsafe when the correctness of its implementations is required to prevent undefined behavior in safe code.
 - **Trait Safety Rule 2**: A trait method should be unsafe if its correct use depends on safety guarantees that must be enforced by the caller.
 
-### 6.2 Safety Comments
+### 5.2 Safety Comments
 - **Trait Comments Rule 1**: An unsafe trait must document the safety invariants that all implementations are required to uphold.
 - **Trait Comments Rule 2**: Each unsafe method of a trait must clearly document the safety requirements that callers must satisfy.
     - The safety requirements of an unsafe method are distinct from the trait invariants.
@@ -368,7 +368,7 @@ A trait defines a collection of associated items (typically functions) that can 
 - **Trait Comments Rule 3**  (Recommended): Implementations of unsafe traits are encouraged to justify why the required invariants are satisfied.
 
 
-### 6.3 Example Cases
+### 5.3 Example Cases
 
 The following example introduces a trait `Buffer` that should be declared unsafe, because incorrectly implementing it may introduce undefined behavior. 
 The trait defines an unsafe method `get_unchecked`. It cannot be declared safe because its safety requirements cannot be guaranteed solely by the trait invariant.

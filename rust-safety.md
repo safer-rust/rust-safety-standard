@@ -77,17 +77,14 @@ impl EvenNumber {
 For example, in the Rust standard library, [`RawWaker`](https://doc.rust-lang.org/core/task/struct.RawWaker.html) and [`RawWakerVTable`](https://doc.rust-lang.org/core/task/struct.RawWakerVTable.html) are types without type invariants and currently contain no internal unsafe code. 
 Therefore, their constructors `new` are both declared safe. These structs are then used by [`LocalWaker`](https://doc.rust-lang.org/core/task/struct.LocalWaker.html), which enforces the type invariants. As a result, its constructors [`new`](https://doc.rust-lang.org/core/task/struct.LocalWaker.html#method.new) and [`from_raw`](https://doc.rust-lang.org/core/task/struct.LocalWaker.html#method.from_raw) are declared unsafe.
 
-
 Note that the introduction of new unsafe code is discouraged unless necessary.
 Sometimes, introducing new unsafe functions can bring benefits and help avoid exposing additional unsafe functions.
 This is essential to prevent the proliferation of unsafe code and the degradation of overall safety in Rust projects.
 
 ### 2.4 Decoupling
-To provide clearer and more actionable guidance, decoupling the relationships between safety responsibilities is very important. 
-One key decoupling strategy is to separate the safety of free functions and structs.
-In particular, we conceptually treat struct construction and field access as follows: a free function creates a struct instance only via the struct’s constructors (including struct literals), and any direct field access is modeled as an invocation of the struct’s implicit methods.
-
-For example, in the following code, we can treat `new_unchecked` as a free function that returns a an `EvenNumber` instance, instead of a constructor; the real constructor is the literal constructor of the tuple struct `EvenNumber()`:
+Sometimes, it can be unclear how safety duties should be allocated among related program components. Decoupling these responsibilities is therefore essential. 
+A common source of confusion involves free functions that return a struct instance. In such cases, we recommend treating the free function as indirectly constructing the instance via the struct’s own constructors, including the literal constructor.
+For example, in the following code, we can treat `new_unchecked` as a free function that returns a an `EvenNumber` instance, instead of a constructor; the real constructor is the literal constructor of the tuple struct `EvenNumber()`.
 
 ```rust
 pub struct EvenNumber(u32);
@@ -115,44 +112,22 @@ impl EvenNumber {
 }
 ```
 
-Similarly, one may create objects of other types that enclose the struct, such as `Box<EvenNumber>`. These should also rely on the constructor of `EvenNumber`:
+Similarly, one may create objects of other types that enclose the struct, such as `Box<EvenNumber>`. These should also rely on the constructor of `EvenNumber`.
 ```rust
 pub unsafe fn new_unchecked(x: u32) -> Box<EvenNumber> {
     Box::new(EvenNumber::new_unchecked(x))
 }
 ```
 
-In the same way, direct field assignments (e.g., `even_number.0 = ...`) can be treated as invoking the literal methods of the struct.
 
-## 3 Establish A Soundness Criterion
-Existing soundness criteria require only that safe code cannot cause undefined behavior, but they do not clearly specify the scope in which such code usage is considered. 
-[Visibility](https://doc.rust-lang.org/reference/visibility-and-privacy.html) plays a critical role in soundness, because it determines which and how APIs are accessible.
+## 2.5 Visibility and Soundness
+In Rust, soundness is tied to [Visibility](https://doc.rust-lang.org/reference/visibility-and-privacy.html), because it determines which and how APIs are accessible.
+By default, a module is the smallest visibility boundary: all functions, structs, and struct fields are private to the module unless explicitly made public.
+Developer can rely on the visibility restrictions to maintain sound abstractions, i.e., all uses of a module’s public safe items (or unsafe items, provided their safety requirements are met) from outside the module must not lead to undefined behavior.
+This is the default soundness criterion adopted by the Rust standard library, as confirmed by the library team in [issues/152078](https://github.com/rust-lang/rust/issues/152078).
 
-Therefore, the first step for a Rust project to follow this standard is to establish a visibility-aware soundness criterion that enables systematic soundness auditing.
-
-### 3.1 Visibility
-The basic unit of Rust software is a crate. Each crate can contain one or more modules, which in turn can contain submodules, forming a tree-like structure.
-- Module-based visibility:
-  - By default, functions, structs, and struct fields are only visible within the module in which they are defined (i.e., private).
-  - Exception: Items of a public trait are automatically public, regardless of whether they are explicitly marked `pub`; variants of enumeration types are public if the enum itself is public.
-- Visibility granularity: Rust supports different scopes:
-  -  `pub`: the item is visible outside the crate.
-  -  `pub(crate)`: the item is visible anywhere within the current crate.
-  -  `pub(in path)`: the item is visible only within the specified module path.
-  -  `pub(super)`: the item is visible to the parent module.
-
-A program component can rely on visibility restrictions to maintain sound abstractions. 
-
-### 3.2 Visibility-based Soundness Criteria
-Before determining whether each function should be declared safe or unsafe, the project owner should be explicit about which criterion is being adopted, as it guides the subsequent rules for soundness checking. 
-The project owner may select the soundness guarantees that best suit their project.
-
-- **Module-level Soundness Criterion** (default): All uses of a module’s public safe items (or unsafe items, provided their safety requirements are met) from outside the module must not lead to undefined behavior.
-
-This is the default soundness criterion adopted by the Rust standard library, as a module represents the smallest unit of accessibility control.
-
-For example, the following code is considered sound even if it is possible to store an arbitrary raw pointer into HOOK using only safe code. 
-This criterion has been confirmed by the library team in [issues/152078](https://github.com/rust-lang/rust/issues/152078).
+For example, the following code snippet is considered sound even if it is possible to store an arbitrary raw pointer into HOOK using only safe code. 
+This criterion .
 ```rust
 static HOOK: AtomicPtr<()> = AtomicPtr::new(ptr::null_mut());
 
@@ -167,36 +142,10 @@ pub fn rust_oom(layout: Layout) -> ! {
  } 
 ```
 
-- **Crate-level Soundness Criterion** (relaxed): All uses of the crate’s public safe items (or unsafe items when their safety requirements are satisfied) from outside the crate must not cause undefined behavior.
-
-This is a more relaxed criterion while still providing soundness guarantees.
-Some systems may nevertheless prefer such safety criteria because certain APIs are designed for specific usage contexts and can rely on global or system state to ensure safety.
-
-- **Struct-level Soundness Criterion** (stricter): All uses of a struct’s safe items (or unsafe items when their safety requirements are satisfied) must not cause undefined behavior, even within the same module.
-
-This is the most strict criterion. 
-Since all private methods and fields are accessible within a module, a struct cannot rely on visibility to prevent misuse from code in the same module.
-It is equivelent to the module-level soundness criterion if the module has only one struct.
-
-Ensuring struct-level soundness can be challenging, particularly when considering struct literals, which allow creation of instances without going through constructors that uphold the type invariant.
-This might be achievable in the future through the use of [unsafe fields](https://rust-lang.github.io/rust-project-goals/2025h1/unsafe-fields.html). 
-For example, [Vec](https://github.com/rust-lang/rust/blob/7d8ebe3128fc87f3da1ad64240e63ccf07b8f0bd/library/alloc/src/vec/mod.rs#L440) is defined as follows. 
-Developers within the same module can easily create a `Vec` instance or modify `len` via struct literals in ways that violate the type invariant.
-```rust
-pub struct Vec<T, #[unstable(feature = "allocator_api", issue = "32838")] A: Allocator = Global> {
-    buf: RawVec<T, A>,
-    len: usize,
-}
-```
-
-### 3.3 Principle of Least Unsound Scope 
-
 The soundness criterion serves as the last line of defense against undefined behavior. 
 Whenever possible, safety should be ensured earlier by restricting the scope of unsafe code or enforcing invariants locally.
-
 For example, in Rust-for-Linux’s `List`, the private method [insert_inner](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L489-L531) is declared unsafe with clearly documented safety requirements to prevent misuse. 
 This demonstrates that even if a function is not part of the public API, it is recommended to mark it unsafe when its correct use depends on invariants that cannot be enforced by the type system alone.
-
 
 ## 4 Rules for Free Functions
 A free function is a function defined at the module level that can be called directly by its path rather than through an instance or type.
@@ -290,7 +239,6 @@ pub unsafe fn bar<T>(x: T) {
 ```
 
 Besides function calls, operations such as raw pointer dereferencing, accessing static mut values, and reading or writing union fields can be treated in the same way as unsafe callees with specific safety requirements, and the same rules apply.
-
 
 ## 5 Rules for Stucts
 
@@ -410,7 +358,7 @@ A trait defines a collection of associated items (typically functions) that can 
 - **Trait Safety Rule 1**: Declare a trait unsafe when the correctness of its implementations is required to prevent undefined behavior in safe code.
 - **Trait Safety Rule 2**: A trait method should be unsafe if its correct use depends on safety guarantees that must be enforced by the caller.
 
-### 5.2 Safety Comments
+### 6.2 Safety Comments
 - **Trait Comments Rule 1**: An unsafe trait must document the safety invariants that all implementations are required to uphold.
 - **Trait Comments Rule 2**: Each unsafe method of a trait must clearly document the safety requirements that callers must satisfy.
     - The safety requirements of an unsafe method are distinct from the trait invariants.
@@ -437,4 +385,3 @@ unsafe trait Buffer {
     unsafe fn get_unchecked(&self, index: usize) -> u8;
 }
 ```
-

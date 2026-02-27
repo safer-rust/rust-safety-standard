@@ -157,7 +157,7 @@ mod vec {
 
 #### 2.5.2 Static Variables
 A function may rely on the states of private static variables to ensure soundness. 
-For example, the `function do_critical_task` in the following code can be declared safe. 
+For example, the function `do_critical_task` in the following code can be declared safe. 
 It requires the static variable `PTR` to be either `null` or to point to `CONFIG`. 
 This requirement is always satisfied because, within this module, PTR can only have these two states. 
 Although future modifications to the module could introduce additional states or allow PTR to be modified in new ways, it is unnecessary to declare do_critical_task as unsafe.

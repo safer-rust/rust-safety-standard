@@ -119,32 +119,110 @@ pub unsafe fn new_unchecked(x: u32) -> Box<EvenNumber> {
 }
 ```
 
-
 ### 2.5 Visibility and Soundness
 In Rust, soundness is tied to [Visibility](https://doc.rust-lang.org/reference/visibility-and-privacy.html), because it determines which and how APIs are accessible.
 By default, a module is the smallest visibility boundary: all functions, structs, and struct fields are private to the module unless explicitly made public.
 Developer can rely on the visibility restrictions to maintain sound abstractions, i.e., all uses of a module’s public safe items (or unsafe items, provided their safety requirements are met) from outside the module must not lead to undefined behavior.
-This is the default soundness criterion adopted by the Rust standard library, as confirmed by the library team in [issues/152078](https://github.com/rust-lang/rust/issues/152078).
+This is the default soundness criterion adopted by the Rust standard library. 
 
-For example, the following code snippet is considered sound even if it is possible to store an arbitrary raw pointer into `HOOK` using only safe code. 
+#### 2.5.1 Struct Literals and Field Projections
+In the following example, `Vec` is a struct with defined invariants, and `new` is a safe constructor that ensures all safety invariants hold. Although it is possible to break these invariants within the module using struct literals or field projections (e.g., v.len = usize::MAX), this is still considered sound. Preventing these fields from being publicly accessible is key to ensuring soundness.
+
 ```rust
-static HOOK: AtomicPtr<()> = AtomicPtr::new(ptr::null_mut());
+/// # Safety Invariants
+/// - If `cap == 0`, `ptr` must be dangling and never dereferenced.
+/// - If `cap > 0`, `ptr` points to a heap allocation for `cap` elements of `T`.
+/// - The range `[0, len)` is initialized.
+/// - `len <= cap`.
+/// - This `Vec` uniquely owns the allocation.
+mod vec {
+    pub struct Vec<T> {
+        ptr: NonNull<T>, // pointer to heap allocation
+        len: usize,      // number of initialized elements
+        cap: usize,      // total allocated capacity
+        _marker: PhantomData<T>,
+    }
 
-pub fn rust_oom(layout: Layout) -> ! { 
-     crate::sys::backtrace::__rust_end_short_backtrace(|| { 
-         let hook = HOOK.load(Ordering::Acquire); 
-         let hook: fn(Layout) = 
-             if hook.is_null() { default_alloc_error_hook } else { unsafe { mem::transmute(hook) } }; 
-         hook(layout); 
-         crate::process::abort() 
-     }) 
- } 
+    pub fn new() -> Self {
+        Self {
+            ptr: NonNull::dangling(),
+            len: 0,
+            cap: 0,
+            _marker: PhantomData,
+        }
+    }
+    ...
+}
 ```
 
-The soundness criterion serves as the last line of defense against undefined behavior. 
-Whenever possible, safety should be ensured earlier by restricting the scope of unsafe code or enforcing invariants locally.
-For example, in Rust-for-Linux’s `List`, the private method [insert_inner](https://github.com/Rust-for-Linux/linux/blob/08afcc38a64cec3d6065b90391afebfde686a69a/rust/kernel/list.rs#L489-L531) is declared unsafe with clearly documented safety requirements to prevent misuse. 
-This demonstrates that even if a function is not part of the public API, it is recommended to mark it unsafe when its correct use depends on invariants that cannot be enforced by the type system alone.
+#### 2.5.2 Static Variables
+A function may rely on the states of private static variables to ensure soundness. 
+For example, the `function do_critical_task` in the following code can be declared safe. 
+It requires the static variable `PTR` to be either `null` or to point to `CONFIG`. 
+This requirement is always satisfied because, within this module, PTR can only have these two states. 
+Although future modifications to the module could introduce additional states or allow PTR to be modified in new ways, it is unnecessary to declare do_critical_task as unsafe.
+In that case, declaring the new function as unsafe should be preferred in order to avoid introducing a semantically breaking change to the function `do_critical_task`.
+
+```rust
+mod FooSys {
+    use std::{ptr, sync::atomic::{AtomicPtr, Ordering}};
+
+    /// Static atomic pointer pointing to system configuration
+    static PTR: AtomicPtr<u32> = AtomicPtr::new(ptr::null_mut());
+
+    /// Initialize the system and set PTR to point to a valid static resource
+    pub fn initialize_system() {
+        static CONFIG: u32 = 42;
+        PTR.store(&CONFIG as *const u32 as *mut u32, Ordering::SeqCst);
+    }
+
+    pub fn do_critical_task() {
+        let ptr = PTR.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            unsafe { read_config(ptr); }
+        }
+    }
+
+    // Safety: `ptr` must point to a valid configuration.
+    unsafe fn read_config(ptr: *mut u32) {
+       ...
+    }
+}
+```
+Sometimes, in a large crate, a static variable may be pub across several modules but not exposed outside the crate. 
+As long as it cannot enter invalid states and downstream crate users cannot introduce invalid states to it, using the static variable in this way is considered sound.
+
+#### 2.5.3 Sealed Traits
+Making a trait sealed is necessary if implementing it outside the module could introduce undefined behavior. 
+In the example below, the module FooSys defines a private trait `Sealed` and a public trait `Foo` that requires implementers to also implement Sealed. 
+This design ensures that only types defined within the module, such as `Bar`, can implement `Foo`.
+This prevents external types that have a `len` field from misimplementing `Foo`.
+```
+mod FooSys {
+    // Private module to seal the trait
+    pub mod private {
+        pub trait Sealed {}
+    }
+
+    /// Public trait `Foo`, only implementable within this module
+    /// because it requires `Sealed`.
+    pub trait Foo: private::Sealed {
+        fn set_len(&mut self, len: usize);
+        fn get_len(&self) -> usize;
+    }
+
+    /// Internal struct with private field
+    pub struct Bar {
+        len: usize, 
+    }
+
+    impl private::Sealed for Bar {}
+
+    impl Foo for Bar {
+        ...
+    }
+}
+```
 
 ## 3 Rules for Free Functions
 A free function is a function defined at the module level that can be called directly by its path rather than through an instance or type.

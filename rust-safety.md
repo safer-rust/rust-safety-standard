@@ -46,8 +46,8 @@ If such invariant does not exist, then `new_unchecked` is safe, as misuse does n
 Therefore, both versions below are sound, but they correspond to different design choices regarding the type’s invariants.
 
 ```rust
-/// # Safety
-/// ## Struct invariant
+/// # Safety:
+/// ## Type invariants:
 /// - `x` must be even.
 pub struct EvenNumber {
   val: u32,
@@ -89,7 +89,7 @@ For example, in the following code, we can treat `new_unchecked` as a free funct
 ```rust
 pub struct EvenNumber(u32);
 
-/// # Safety
+/// # Safety:
 /// - `x` must be even.
 pub unsafe fn new_unchecked(x: u32) -> EvenNumber {
     EvenNumber(x)
@@ -98,8 +98,8 @@ pub unsafe fn new_unchecked(x: u32) -> EvenNumber {
 
 A better design is to place the unsafe function inside the `impl` block of the struct:
 ```rust
-/// # Safety
-/// ## Struct invariant
+/// # Safety:
+/// ## Type invariants:
 /// - `x` must be even.
 pub struct EvenNumber(u32);
 
@@ -129,7 +129,8 @@ This is the default soundness criterion adopted by the Rust standard library.
 In the following example, `Vec` is a struct with defined invariants, and `new` is a safe constructor that ensures all safety invariants hold. Although it is possible to break these invariants within the module using struct literals or field projections (e.g., `v.len = usize::MAX`), this is still considered sound. Preventing these fields from being publicly accessible is key to ensuring soundness.
 
 ```rust
-/// # Safety Invariants
+/// # Safety:
+/// ## Type invariants:
 /// - If `cap == 0`, `ptr` must be dangling and never dereferenced.
 /// - If `cap > 0`, `ptr` points to a heap allocation for `cap` elements of `T`.
 /// - The range `[0, len)` is initialized.
@@ -391,7 +392,7 @@ Alternatively, the constructor can be declared unsafe while the accessor method 
 
 ```rust
 /// # Safety:
-/// ## Type invariant
+/// ## Type invariants:
 /// - `ptr` is valid for reads of `len` bytes.
 /// - `ptr` is properly aligned.
 /// - The referenced memory remains valid for the lifetime of `Foo`.
@@ -451,8 +452,8 @@ The following example introduces a trait `Buffer` that should be declared unsafe
 The trait defines an unsafe method `get_unchecked`. It cannot be declared safe because its safety requirements cannot be guaranteed solely by the trait invariant.
 ```rust
 /// # Safety:
-/// ## Trait invariant: 
-/// - Implementors must guarantee that `as_bytes()` always returns a slice pointing to valid memory for reads
+/// ## Trait invariants: 
+/// - Implementors must guarantee that `as_bytes()` always returns a slice pointing to valid memory for reads,
 /// - and that the slice remains valid for the lifetime of the returned reference. 
 unsafe trait Buffer {
     fn as_bytes(&self) -> &[u8];

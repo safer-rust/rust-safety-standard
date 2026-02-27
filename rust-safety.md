@@ -189,7 +189,7 @@ mod FooSys {
     }
 }
 ```
-Sometimes, in a large crate, a static variable may be pub across several modules but not exposed outside the crate. 
+Sometimes, in a large crate, a static variable may be `pub` across several modules but not exposed outside the crate. 
 As long as it cannot enter invalid states and downstream crate users cannot introduce invalid states to it, using the static variable in this way is considered sound.
 
 #### 2.5.3 Sealed Traits

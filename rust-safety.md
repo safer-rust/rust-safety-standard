@@ -267,7 +267,7 @@ In the following example, the caller `bar` justifies why each of the safety requ
 Since all the requirements are satisfied, `bar` can be declared safe according to Function Safety Rule 1. 
 
 ```rust
-pub  fn bar() {
+pub fn bar() {
     let mut x: u32 = 42;
     let p: *const u32 = &x;
     // Safety: 

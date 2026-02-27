@@ -212,7 +212,6 @@ mod FooSys {
         fn get_len(&self) -> usize;
     }
 
-    /// Internal struct with private field
     pub struct Bar {
         len: usize, 
     }

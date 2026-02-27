@@ -159,8 +159,8 @@ mod vec {
 A function may rely on the states of private static variables to ensure soundness. 
 For example, the function `do_critical_task` in the following code can be declared safe. 
 It requires the static variable `PTR` to be either `null` or to point to `CONFIG`. 
-This requirement is always satisfied because, within this module, PTR can only have these two states. 
-Although future modifications to the module could introduce additional states or allow PTR to be modified in new ways, it is unnecessary to declare do_critical_task as unsafe.
+This requirement is always satisfied because, within this module, `PTR` can only have these two states. 
+Although future modifications to the module could introduce additional states or allow `PTR` to be modified in new ways, it is unnecessary to declare `do_critical_task` as unsafe.
 In that case, declaring the new function as unsafe should be preferred in order to avoid introducing a semantically breaking change to the function `do_critical_task`.
 
 ```rust

@@ -126,7 +126,7 @@ Developer can rely on the visibility restrictions to maintain sound abstractions
 This is the default soundness criterion adopted by the Rust standard library. 
 
 #### 2.5.1 Struct Literals and Field Projections
-In the following example, `Vec` is a struct with defined invariants, and `new` is a safe constructor that ensures all safety invariants hold. Although it is possible to break these invariants within the module using struct literals or field projections (e.g., v.len = usize::MAX), this is still considered sound. Preventing these fields from being publicly accessible is key to ensuring soundness.
+In the following example, `Vec` is a struct with defined invariants, and `new` is a safe constructor that ensures all safety invariants hold. Although it is possible to break these invariants within the module using struct literals or field projections (e.g., `v.len = usize::MAX`), this is still considered sound. Preventing these fields from being publicly accessible is key to ensuring soundness.
 
 ```rust
 /// # Safety Invariants

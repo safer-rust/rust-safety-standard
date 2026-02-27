@@ -197,7 +197,7 @@ Making a trait sealed is necessary if implementing it outside the module could i
 In the example below, the module FooSys defines a private trait `Sealed` and a public trait `Foo` that requires implementers to also implement Sealed. 
 This design ensures that only types defined within the module, such as `Bar`, can implement `Foo`.
 This prevents external types that have a `len` field from misimplementing `Foo`.
-```
+```rust
 mod FooSys {
     // Private module to seal the trait
     pub mod private {

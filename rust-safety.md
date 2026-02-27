@@ -1,4 +1,4 @@
-# Rust Safety Standard
+# Rust Safety Standard (Request for Comments)
 This standard is a draft and welcomes feedback.
 
 ## 1. Background

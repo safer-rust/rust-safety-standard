@@ -201,7 +201,7 @@ This prevents external types that have a `len` field from misimplementing `Foo`.
 ```rust
 mod FooSys {
     // Private module to seal the trait
-    pub mod private {
+    mod private {
         pub trait Sealed {}
     }
 

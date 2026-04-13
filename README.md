@@ -7,3 +7,4 @@ The standard is currently under discussion ons [Rust internals](https://internal
 
 - [Unsafe doc in the Rust standard library](https://safer-rust.github.io/std-unsafe-doc/)
 - [Unsafe doc in the Rust-for-Linux](https://safer-rust.github.io/linux-unsafe-doc/)
+- [Unsafe doc in Bevy](https://github.com/safer-rust/bevy-unsafe-doc)

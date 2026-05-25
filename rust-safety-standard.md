@@ -48,7 +48,7 @@ Therefore, both versions below are sound, but they correspond to different desig
 ```rust
 /// # Safety:
 /// ## Type invariants:
-/// - `x` must be even.
+/// - `val` must be even.
 pub struct EvenNumber {
   val: u32,
 }

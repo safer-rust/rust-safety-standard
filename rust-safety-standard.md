@@ -50,7 +50,7 @@ Therefore, both versions below are sound, but they correspond to different desig
 /// ## Type invariants:
 /// - `val` must be even.
 pub struct EvenNumber {
-  val: u32,
+    val: u32,
 }
 
 impl EvenNumber {
@@ -64,7 +64,7 @@ impl EvenNumber {
 
 ```rust
 pub struct EvenNumber {
-  val: u32,
+    val: u32,
 }
 
 impl EvenNumber {
@@ -100,7 +100,7 @@ A better design is to place the unsafe function inside the `impl` block of the s
 ```rust
 /// # Safety:
 /// ## Type invariants:
-/// - `x` must be even.
+/// - The field must be even.
 pub struct EvenNumber(u32);
 
 impl EvenNumber {

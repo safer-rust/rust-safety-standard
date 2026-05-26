@@ -249,7 +249,8 @@ According to Function Safety Rule 1, foo must be declared unsafe.
 
 ```rust
 /// # Safety:
-/// - `p` must be valid for reads.
+/// - `p` must be valid for reads of size 4.
+/// - the first four bytes at the pointed to location must be initialized.
 /// - `p` must be properly aligned for `u32`.
 pub unsafe fn foo(p: *const u32) -> u32 {
     let r = p;

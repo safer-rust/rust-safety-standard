@@ -193,11 +193,12 @@ mod FooSys {
 Sometimes, in a large crate, a static variable may be `pub` across several modules but not exposed outside the crate. 
 As long as it cannot enter invalid states and downstream crate users cannot introduce invalid states to it, using the static variable in this way is considered sound.
 
-#### 2.5.3 Sealed Traits
-Making a trait sealed is necessary if implementing it outside the module could introduce undefined behavior. 
-In the example below, the module FooSys defines a private trait `Sealed` and a public trait `Foo` that requires implementers to also implement Sealed. 
-This design ensures that only types defined within the module, such as `Bar`, can implement `Foo`.
-This prevents external types that have a `len` field from misimplementing `Foo`.
+#### 2.5.3 Visibility of Trait Implementations
+Making a trait sealed is necessary when allowing external implementations could introduce undefined behavior.
+Traditionally, Rust uses the *sealed trait pattern* to restrict implementations. 
+In the example below, the module `FooSys` defines a private trait `Sealed` and a public trait `Foo` that requires implementers to also implement `Sealed`. 
+Since external crates cannot access the private trait, only types defined within the module can implement `Foo`.
+
 ```rust
 mod FooSys {
     // Private module to seal the trait
@@ -223,6 +224,20 @@ mod FooSys {
     }
 }
 ```
+
+Since [RFC 3323](https://rust-lang.github.io/rfcs/3323-restrictions.html), Rust introduces *trait implementation visibility*, which allows implementation restrictions to be expressed directly in the language.
+In the following example, the `impl(self)` restriction specifies that only code within the current module may implement the trait. 
+```rust
+mod FooSys {
+    /// Public trait `Foo`, only implementable within this module.
+    pub impl(self) unsafe trait Foo {
+        fn set_len(&mut self, len: usize);
+        fn get_len(&self) -> usize;
+    }
+}
+```
+
+This mechanism provides a language-level alternative to the traditional *sealed trait pattern*. Instead of introducing an auxiliary private trait solely to restrict implementations, the implementation restriction is expressed directly in the trait definition, making the intent more explicit and improving compiler diagnostics.
 
 ## 3 Rules for Free Functions
 A free function is a function defined at the module level that can be called directly by its path rather than through an instance or type.

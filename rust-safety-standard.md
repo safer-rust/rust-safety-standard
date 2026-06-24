@@ -453,14 +453,13 @@ A trait defines a collection of associated items (typically functions) that can 
 - **Trait Safety Rule 2**: A trait method should be unsafe if its correct use depends on safety guarantees that must be enforced by the caller.
 
 ### 5.2 Safety Comments
-- **Trait Comments Rule 1**: An unsafe trait must document the safety invariants that all implementations are required to uphold.
+- **Trait Comments Rule 1**: An unsafe trait must document the safety requirements imposed on its implementations.
+    - The requirements should be clearly specified and, where applicable, linked to the relevant trait methods, whether those methods are safe or unsafe.
 - **Trait Comments Rule 2**: Each unsafe method of a trait must clearly document the safety requirements that callers must satisfy.
-    - The safety requirements of an unsafe method are distinct from the trait invariants.
+    - The safety requirements documented for an unsafe method are separate from the requirements that implementations must uphold when implementing an unsafe trait.
     - The safety requirements of an unsafe method must be specified in the trait definition, where they form part of the trait’s contract.
     - Implementations should not introduce stricter safety requirements than those declared by the trait.
-
 - **Trait Comments Rule 3**  (Recommended): Implementations of unsafe traits are encouraged to justify why the required invariants are satisfied.
-
 
 ### 5.3 Example Cases
 

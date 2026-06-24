@@ -360,10 +360,11 @@ They play a key role in preventing the safety of methods from depending on the b
  
 ### 4.2 Safety Comments
 - **Struct Comments Rule 1** (Recommended): Each struct with unsafe constructors should document the type invariant.
-- **Struct Comments Rule 2**: Each unsafe associated function should document its safety requirements:
+- **Struct Comments Rule 2**: Every unsafe associated function that is not a trait method must explicitly document its safety requirements:
   - 1) The requirements should not depend on other functions of the struct.
   - 2) They must be externally verifiable and must not depend on the function’s internal implementation.
-- **Struct Comments Rule 3** (Recommended):  At the callsite of unsafe code, users are encouraged to justify why the safety requirements are satisfied.
+- **Struct Comments Rule 3**: For every unsafe associated function that is a trait method, its safety requirements should be documented in the trait definition, and the implementation should refer readers to that documentation. 
+- **Struct Comments Rule 4** (Recommended): At the callsite of unsafe code, users are encouraged to justify why the safety requirements are satisfied.
 
 ### 4.3 Example Cases
 

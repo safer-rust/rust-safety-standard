@@ -453,8 +453,8 @@ A trait defines a collection of associated items (typically functions) that can 
 - **Trait Safety Rule 2**: A trait method should be unsafe if its correct use depends on safety guarantees that must be enforced by the caller.
 
 ### 5.2 Safety Comments
-- **Trait Comments Rule 1**: An unsafe trait must document the safety requirements imposed on its implementations.
-    - The requirements should be clearly specified and, where applicable, linked to the relevant trait methods, whether those methods are safe or unsafe.
+- **Trait Comments Rule 1**: An unsafe trait must document what its implementations must ensure (i.e., the postconditions)..
+    - These postconditions should be clearly associated with the relevant trait methods, whether safe or unsafe.
 - **Trait Comments Rule 2**: Each unsafe method of a trait must clearly document the safety requirements that callers must satisfy.
     - The safety requirements documented for an unsafe method are separate from the requirements that implementations must uphold when implementing an unsafe trait.
     - The safety requirements of an unsafe method must be specified in the trait definition, where they form part of the trait’s contract.
@@ -467,8 +467,8 @@ The following example introduces a trait `Buffer` that should be declared unsafe
 The trait defines an unsafe method `get_unchecked`. It cannot be declared safe because its safety requirements cannot be guaranteed solely by the trait invariant.
 ```rust
 /// # Safety:
-/// ## Trait invariants: 
-/// - Implementors must guarantee that `as_bytes()` always returns a slice pointing to valid memory for reads,
+/// ## Trait implications must ensure: 
+/// - `as_bytes()` always returns a slice pointing to valid memory for reads,
 /// - and that the slice remains valid for the lifetime of the returned reference. 
 unsafe trait Buffer {
     fn as_bytes(&self) -> &[u8];

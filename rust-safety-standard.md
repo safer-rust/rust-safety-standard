@@ -43,7 +43,8 @@ In the following example, whether `new_unchecked` should be safe or unsafe depen
 If such an invariant is part of the type’s contract, then `new_unchecked` must be declared `unsafe`, since incorrect usage can violate the invariant.
 If such invariant does not exist, then `new_unchecked` is safe, as misuse does not violate any safety invariant.
 
-Therefore, both versions below are sound, but they correspond to different design choices regarding the type’s invariants.
+Therefore, both versions below are sound, but they correspond to different design choices regarding the type’s invariants. The design choice that was made should be documented
+in both cases. This gives authors of unsafe code important information which invariants they are allowed to rely on.
 
 ```rust
 /// # Safety:
@@ -63,6 +64,7 @@ impl EvenNumber {
 ```
 
 ```rust
+/// This type doesn't have a safety invariant. An uneven `EvenNumber` is a bug, not library UB.
 pub struct EvenNumber {
     val: u32,
 }

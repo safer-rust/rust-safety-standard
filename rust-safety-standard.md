@@ -250,7 +250,7 @@ The soundness of free functions is relatively straightforward to justify.
 
 Note that Function Safety Rule 2 continues to hold even when the function calls other functions that contain unsafe code, provided that those callees themselves satisfy Function Safety Rule 1 and do not impose additional safety contracts.
 
-## 3.2 Safety Comments
+### 3.2 Safety Comments
 There are two mandatory rules and one recommended practice for documenting the safety requirements of free functions:
 - **Function Comments Rule 1**: All unsafe functions must document their safety requirements.
 - **Function Comments Rule 2**: Safety requirements must be externally verifiable and must not depend on the function’s internal implementation.
